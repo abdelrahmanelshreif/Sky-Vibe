@@ -1,72 +1,56 @@
 package com.abdelrahman_elshreif.sky_vibe
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import com.abdelrahman_elshreif.sky_vibe.home.view.HomeScreen
+import com.abdelrahman_elshreif.sky_vibe.home.view.WeatherApp
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.LocationViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.LocationViewModelFactory
-import com.abdelrahman_elshreif.sky_vibe.repo.LocationRepository
-
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 
 class MainActivity : ComponentActivity() {
 
-//    private val factory = LocationViewModelFactory(
-//        LocationRepository(applicationContext)
-//
-//    )
-//
-//    private val locationViewModel =
-//        ViewModelProvider(
-//            this@MainActivity,
-//            factory
-//        ).get(LocationViewModel::class.java)
+    private lateinit var locationViewModel: LocationViewModel
 
-    private val locationViewModel: LocationViewModel by viewModels {
-        LocationViewModelFactory(LocationRepository(applicationContext))
-    }
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                locationViewModel.fetchLocation()
+            } else {
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    openAppSettings()
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        locationViewModel = ViewModelProvider(
+            this,
+            LocationViewModelFactory(LocationUtilities(this))
+        ).get(LocationViewModel::class.java)
+
         setContent {
-            LocationScreen(locationViewModel)
+            WeatherApp (
+                viewModel = locationViewModel,
+                onRequestPermission = { requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) }
+            )
         }
     }
-}
 
-
-@Composable
-fun LocationScreen(viewModel: LocationViewModel) {
-    val location by viewModel.loctaionFlow.collectAsState()
-    val address by viewModel.addressFlow.collectAsState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 32.dp)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(text = "Latitude: ${location?.latitude ?: "Unknown"}")
-        Text(text = "Longitude: ${location?.longitude ?: "Unknown"}")
-        Text(text = "Address: $address")
-
-        Button(onClick = { viewModel.fetchLocation() }) {
-            Text(text = "Get Location")
-        }
+    private fun openAppSettings() {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", packageName, null)
+        )
+        startActivity(intent)
     }
 }

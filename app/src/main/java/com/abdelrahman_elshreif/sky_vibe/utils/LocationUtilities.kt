@@ -1,19 +1,24 @@
-package com.abdelrahman_elshreif.sky_vibe.repo
+package com.abdelrahman_elshreif.sky_vibe.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
+import android.provider.Settings
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.google.android.gms.location.*
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class LocationRepository(private val context: Context) {
+class LocationUtilities(private val context: Context) {
 
     private val fusedClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -63,11 +68,16 @@ class LocationRepository(private val context: Context) {
                 }
             }
 
-            fusedClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            fusedClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
 
             continuation.invokeOnCancellation {
                 fusedClient.removeLocationUpdates(locationCallback)
             }
         }
     }
+
 }

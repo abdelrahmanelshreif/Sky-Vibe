@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Sky-Vibe</string>
+    <string name="very_sunny">☀️</string>
+    <string name="sunny">☀️</string>
+    <string name="cloudy">☁️</string>
+    <string name="sun_with_clouds_with_rain">🌦️</string>
+    <string name="rainy">🌧️</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="pressure">Pressure</string>
+    <string name="uv_index">UV Index</string>
+    <string name="humidity">Humidity</string>
+    <string name="hourly_forecast">Hourly Forecast</string>
+    <string name="details">Details</string>
 </resources>

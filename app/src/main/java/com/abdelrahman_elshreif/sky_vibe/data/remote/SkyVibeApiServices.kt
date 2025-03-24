@@ -1,20 +1,18 @@
 package com.abdelrahman_elshreif.sky_vibe.data.remote
 
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface SkyVibeApiServices {
 
-
-    object RetrofitHelper {
-        private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
-
-        private val retrofitInstance =
-            Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-        val apiservice = retrofitInstance.create(SkyVibeApiServices::class.java)
-    }
+    @GET("weather")
+    suspend fun getWeatherByCoordinates(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("appid") apiKey: String = "e315959fbe479848d4ca3ee9d1301721",
+        @Query("units") units: String = "metric",
+        @Query("lang") language: String = "en"
+    ): Response<WeatherResponse>
 }
