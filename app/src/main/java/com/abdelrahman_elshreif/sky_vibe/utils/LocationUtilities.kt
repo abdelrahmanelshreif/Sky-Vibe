@@ -46,7 +46,8 @@ class LocationUtilities(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     suspend fun getFreshLocation(): Location? {
-        return suspendCancellableCoroutine { continuation ->
+        return suspendCancellableCoroutine {
+            continuation ->
             val locationRequest = LocationRequest.Builder(10000L).apply {
                 setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             }.build()

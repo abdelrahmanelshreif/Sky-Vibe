@@ -70,9 +70,6 @@ fun WeatherApp(
             weatherData != null -> {
                 AnimatedWeatherContent(weatherData = weatherData!!)
             }
-            else -> {
-                Text("Unable to fetch weather data", style = MaterialTheme.typography.bodyLarge)
-            }
         }
     }
 }
