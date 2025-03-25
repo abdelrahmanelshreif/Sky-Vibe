@@ -1,7 +1,9 @@
 package com.abdelrahman_elshreif.sky_vibe.home.view
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -42,24 +44,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
-import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.LocationViewModel
 import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherApp(
     homeViewModel: HomeViewModel,
-    locationViewModel: LocationViewModel,
     onRequestPermission: () -> Unit
 ) {
-    val location by locationViewModel.locationFlow.collectAsState()
-    val weatherData by homeViewModel.homeWeatherData.collectAsState()
-
-    LaunchedEffect(location) {
-        onRequestPermission()
-        location?.let {
-            homeViewModel.getWeatherData(it.latitude, it.longitude)
-        }
-    }
+    val weatherData by homeViewModel.homeWeatherData.collectAsState(initial = null)
+    val isLoading by homeViewModel.isLoading.collectAsState(initial = true)
 
     Column(
         modifier = Modifier
@@ -68,16 +66,17 @@ fun WeatherApp(
             .padding(16.dp)
     ) {
         when {
-            weatherData == null -> LoadingWeatherState()
+            isLoading -> LoadingWeatherState()
+            weatherData != null -> {
+                AnimatedWeatherContent(weatherData = weatherData!!)
+            }
             else -> {
-                AnimatedWeatherContent(
-                    weatherData = weatherData!!
-                )
+                Text("Unable to fetch weather data", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
 }
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AnimatedWeatherContent(
     weatherData: WeatherResponse
@@ -98,22 +97,40 @@ fun HourlyForecastCard() {
     Text("")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("DefaultLocale")
 @Composable
 fun WeatherHeader(weatherData: WeatherResponse) {
+    val timezoneOffset = weatherData.timezone
+    val zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(timezoneOffset))
+    val currentTime = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("hh:mm a"))
+    val date = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("EEEE, MMM d yyyy"))
+    val sunriseTime = Instant.ofEpochSecond(weatherData.sys.sunrise.toLong())
+        .atZone(zoneId)
+        .format(DateTimeFormatter.ofPattern("hh:mm a"))
+    val sunsetTime = Instant.ofEpochSecond(weatherData.sys.sunset.toLong())
+        .atZone(zoneId)
+        .format(DateTimeFormatter.ofPattern("hh:mm a"))
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "${weatherData.name} , ${weatherData.sys.country} ",
+            text = "${weatherData.name}, ${weatherData.sys.country}",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
 
+        Text(
+            text = "$date | $currentTime",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
+
         AnimatedContent(targetState = weatherData.main.temp) { temp ->
             Text(
-                text = stringResource(R.string.c, String.format("%.1f", temp)),
+                text = stringResource(R.string.c, String.format("%.1f ", temp)),
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -124,6 +141,12 @@ fun WeatherHeader(weatherData: WeatherResponse) {
                 ?: "Weather Unavailable",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Text(
+            text = "Sunrise: $sunriseTime | Sunset: $sunsetTime",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
     }
 }

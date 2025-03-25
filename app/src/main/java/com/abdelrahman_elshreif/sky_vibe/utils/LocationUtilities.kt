@@ -3,15 +3,11 @@ package com.abdelrahman_elshreif.sky_vibe.utils
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
-import android.provider.Settings
-import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import com.google.android.gms.location.*
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
@@ -23,22 +19,22 @@ class LocationUtilities(private val context: Context) {
     private val fusedClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
-    fun checkPermissions(): Boolean {
+    private fun checkPermissions(): Boolean {
         return (ContextCompat.checkSelfPermission(
-            context, android.Manifest.permission.ACCESS_FINE_LOCATION
+            context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED) ||
                 (ContextCompat.checkSelfPermission(
-                    context, android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION
                 ) == android.content.pm.PackageManager.PERMISSION_GRANTED)
     }
 
-    fun isLocationEnabled(): Boolean {
+    private fun isLocationEnabled(): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
-    fun getAddressFromLocation(lat: Double, lon: Double): String {
+    private fun getAddressFromLocation(lat: Double, lon: Double): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(lat, lon, 1)
@@ -80,4 +76,24 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
+    suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
+        return try {
+            if (!checkLocationAvailability()) {
+                return Pair(null, "Location not available")
+            }
+
+            val location = getFreshLocation()
+            val address = location?.let {
+                getAddressFromLocation(it.latitude, it.longitude)
+            } ?: "Location not found"
+
+            Pair(location, address)
+        } catch (e: Exception) {
+            Pair(null, "Error: ${e.message}")
+        }
+    }
+
+    fun checkLocationAvailability(): Boolean {
+        return checkPermissions() && isLocationEnabled()
+    }
 }
