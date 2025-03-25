@@ -45,6 +45,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.4")
 
 
+    implementation ("androidx.compose.material:material-icons-extended:$2.8.4")
 
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")

@@ -10,5 +10,11 @@
     <string name="uv_index">UV Index</string>
     <string name="humidity">Humidity</string>
     <string name="hourly_forecast">Hourly Forecast</string>
-    <string name="details">Details</string>
+    <string name="weather_details">Details</string>
+    <string name="temperature">Temperature</string>
+    <string name="wind">Wind</string>
+    <string name="clouds">Clouds</string>
+    <string name="hpa">%1$s hPa</string>
+    <string name="m_s">%1$s m/s</string>
+    <string name="c">%1$s°C</string>
 </resources>

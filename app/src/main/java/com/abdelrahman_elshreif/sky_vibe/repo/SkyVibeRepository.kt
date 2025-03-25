@@ -4,27 +4,28 @@ import com.abdelrahman_elshreif.sky_vibe.data.local.ForecastingLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.remote.ForecastingRemoteDataSource
 import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 @Suppress("UNCHECKED_CAST")
-class Repository private constructor(
+class SkyVibeRepository private constructor(
     private val remoteDataSource: ForecastingRemoteDataSource,
     private val localDataSource: ForecastingLocalDataSource,
 ) {
 
-    suspend fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> {
-        return remoteDataSource.getWeatherDataOfCoordinates(lat, lon) as Flow<WeatherResponse?>
+    fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> = flow {
+        val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon)
+        emit(response)
     }
 
 
-
     companion object {
-        private var repository: Repository? = null
+        private var repository: SkyVibeRepository? = null
         fun getInstance(
             remoteDataSource: ForecastingRemoteDataSource,
             localDataSource: ForecastingLocalDataSource
-        ): Repository? {
+        ): SkyVibeRepository? {
             if (repository == null) {
-                repository = Repository(remoteDataSource, localDataSource)
+                repository = SkyVibeRepository(remoteDataSource, localDataSource)
             }
             return repository
         }

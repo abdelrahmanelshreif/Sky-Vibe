@@ -1,8 +1,12 @@
 package com.abdelrahman_elshreif.sky_vibe.home.view
 
-import androidx.compose.ui.graphics.*
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,178 +14,209 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbCloudy
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.abdelrahman_elshreif.sky_vibe.R
+import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.LocationViewModel
-
+import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
 
 @Composable
-fun HomeScreen(viewModel: LocationViewModel, onRequestPermission: () -> Unit) {
-    val location by viewModel.locationFlow.collectAsState()
-    val address by viewModel.addressFlow.collectAsState()
+fun WeatherApp(
+    homeViewModel: HomeViewModel,
+    locationViewModel: LocationViewModel,
+    onRequestPermission: () -> Unit
+) {
+    val location by locationViewModel.locationFlow.collectAsState()
+    val weatherData by homeViewModel.homeWeatherData.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 32.dp)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(text = "Latitude: ${location?.latitude ?: "Unknown"}")
-        Text(text = "Longitude: ${location?.longitude ?: "Unknown"}")
-        Text(text = "Address: $address")
-
-        Button(onClick = { }) {
-            Text(text = "Get Location")
+    LaunchedEffect(location) {
+        onRequestPermission()
+        location?.let {
+            homeViewModel.getWeatherData(it.latitude, it.longitude)
         }
     }
-}
-
-//
-//@Preview(showBackground = true)
-@Composable
-fun WeatherApp(viewModel: LocationViewModel, onRequestPermission: () -> Unit) {
-    onRequestPermission()
-    val location by viewModel.locationFlow.collectAsState()
-    val address by viewModel.addressFlow.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFe9e9e9))
-    ) {
-        Header(address)
-        HourlyForecast()
-        WeatherDetails()
-    }
-}
-
-@Composable
-fun Header(address: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = address, fontSize = 24.sp)
-        Text(text = "Partly Cloudy", fontSize = 20.sp)
-        Text(text = "Tuesday, 24 August 2020", fontSize = 16.sp)
-    }
-}
-
-@Composable
-fun WeatherDetails() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(text = stringResource(R.string.details), fontSize = 20.sp)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            WeatherDetailItem(label = "72", description = stringResource(R.string.fahrenheit))
-            WeatherDetailItem(label = "134 mph/h", description = stringResource(R.string.pressure))
-            WeatherDetailItem(label = "0.2", description = stringResource(R.string.uv_index))
-            WeatherDetailItem(label = "48%", description = stringResource(R.string.humidity))
-        }
-    }
-}
-
-@Composable
-fun WeatherDetailItem(label: String, description: String) {
-    Column(
-        modifier = Modifier
-
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = label, fontSize = 24.sp)
-        Text(text = description, fontSize = 12.sp)
-    }
-}
-
-@Composable
-fun HourlyForecast() {
-
-    Card(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(text = stringResource(R.string.hourly_forecast), fontSize = 20.sp)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                HourlyWeatherItem(
-                    time = "2 PM",
-                    temperature = "28°",
-                    icon = stringResource(R.string.very_sunny)
-                )
-                HourlyWeatherItem(
-                    time = "3 PM",
-                    temperature = "27°",
-                    icon = stringResource(R.string.sunny)
-                )
-                HourlyWeatherItem(
-                    time = "4 PM",
-                    temperature = "26°",
-                    icon = stringResource(R.string.cloudy)
-                )
-                HourlyWeatherItem(
-                    time = "5 PM",
-                    temperature = "22°",
-                    icon = stringResource(R.string.sun_with_clouds_with_rain)
-                )
-                HourlyWeatherItem(
-                    time = "6 PM",
-                    temperature = "25°",
-                    icon = stringResource(R.string.rainy)
+        when {
+            weatherData == null -> LoadingWeatherState()
+            else -> {
+                AnimatedWeatherContent(
+                    weatherData = weatherData!!
                 )
             }
         }
     }
-
 }
 
 @Composable
-fun HourlyWeatherItem(time: String, temperature: String, icon: String) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = time, fontSize = 16.sp)
-        Text(text = temperature, fontSize = 20.sp)
-        Text(text = icon, fontSize = 24.sp)
+fun AnimatedWeatherContent(
+    weatherData: WeatherResponse
+) {
+    AnimatedVisibility(visible = true) {
+        Column {
+            WeatherHeader(weatherData)
+            Spacer(modifier = Modifier.height(16.dp))
+            WeatherDetailsCard(weatherData)
+            Spacer(modifier = Modifier.height(16.dp))
+            HourlyForecastCard()
+        }
     }
 }
 
+@Composable
+fun HourlyForecastCard() {
+    Text("")
+}
+
+@SuppressLint("DefaultLocale")
+@Composable
+fun WeatherHeader(weatherData: WeatherResponse) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "${weatherData.name} , ${weatherData.sys.country} ",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        AnimatedContent(targetState = weatherData.main.temp) { temp ->
+            Text(
+                text = stringResource(R.string.c, String.format("%.1f", temp)),
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        Text(
+            text = weatherData.weather.firstOrNull()?.description?.capitalize()
+                ?: "Weather Unavailable",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+fun WeatherDetailsCard(weatherData: WeatherResponse) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.weather_details),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                WeatherDetailItem(
+                    icon = Icons.Default.Air,
+                    label = stringResource(R.string.wind),
+                    value = stringResource(R.string.m_s, weatherData.wind.speed)
+                )
+                WeatherDetailItem(
+                    icon = Icons.Default.WbCloudy,
+                    label = stringResource(R.string.clouds),
+                    value = "${weatherData.clouds.all}% "
+                )
+                WeatherDetailItem(
+                    icon = Icons.Default.WaterDrop,
+                    label = stringResource(R.string.humidity),
+                    value = "${weatherData.main.humidity}%"
+                )
+                WeatherDetailItem(
+                    icon = Icons.Default.Compress,
+                    label = stringResource(R.string.pressure),
+                    value = stringResource(R.string.hpa, weatherData.main.pressure)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingWeatherState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Loading...",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherDetailItem(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+        )
+    }
+}

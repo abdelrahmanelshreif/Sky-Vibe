@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sky-Vibe</string>
+    <string name="very_sunny">حار</string>
+    <string name="sunny">مشمس</string>
+    <string name="cloudy">مغيم</string>
+    <string name="sun_with_clouds_with_rain">غيوم مع احتمال المطر</string>
+    <string name="rainy">ممطر</string>
+    <string name="fahrenheit">"فهرنهايت "</string>
+    <string name="pressure">الضغط</string>
+    <string name="uv_index">الأشعة فوق البنفسجية</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="hourly_forecast">حالة الطقس على مدار الساعة</string>
+    <string name="weather_details">التفاصيل</string>
+    <string name="temperature">درجة الحرارة</string>
+    <string name="wind">الرياح</string>
+    <string name="clouds">السحب</string>
+    <string name="hpa">%1$s هيكتوباسكال</string>
+    <string name="m_s">%1$s  متر/ث</string>
+    <string name="c">%1$sس°</string>
+</resources>
