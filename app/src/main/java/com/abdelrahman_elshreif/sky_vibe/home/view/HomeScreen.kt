@@ -1,10 +1,13 @@
-@file:Suppress("PreviewAnnotationInFunctionWithParameters")
-
 package com.abdelrahman_elshreif.sky_vibe.home.view
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -41,10 +44,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
@@ -54,14 +59,30 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun WeatherApp(
-    homeViewModel: HomeViewModel
-) {
-    val weatherData by homeViewModel.homeWeatherData.collectAsState(initial = null)
-    val isLoading by homeViewModel.isLoading.collectAsState(initial = true)
+fun WeatherApp(homeViewModel: HomeViewModel) {
 
+    val weatherData = homeViewModel.homeWeatherData.collectAsState(null)
+    val forecastData = homeViewModel.forecastData.collectAsState(null)
+    val isLoading = homeViewModel.isLoading.collectAsState(true)
+
+    val context = LocalContext.current
+    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+//            homeViewModel.fetchLocation()
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (!context.hasPermission(locationPermission)) {
+            permissionLauncher.launch(locationPermission)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,23 +90,14 @@ fun WeatherApp(
             .padding(16.dp)
     ) {
         when {
-            isLoading -> LoadingWeatherState()
-            weatherData != null -> {
-                AnimatedWeatherContent(weatherData = weatherData!!)
-            }
-
-            else -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-
-                    Text("Unable to fetch weather data", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
+            isLoading.value -> LoadingWeatherState()
+            weatherData.value != null -> AnimatedWeatherContent(weatherData.value!!)
         }
     }
+}
+
+fun Context.hasPermission(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -105,27 +117,26 @@ fun AnimatedWeatherContent(weatherData: WeatherResponse) {
 
 @Composable
 fun HourlyForecastCard() {
-    Text("")
+
 }
 
 
+@SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherHeader(weatherData: WeatherResponse) {
+
     val timezoneOffset = weatherData.timezone
     val zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(timezoneOffset))
     val currentTime = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("hh:mm a"))
     val date = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("EEEE, MMM d yyyy"))
-    val sunriseTime = Instant.ofEpochSecond(weatherData.sys.sunrise.toLong())
-        .atZone(zoneId)
+    val sunriseTime = Instant.ofEpochSecond(weatherData.sys.sunrise.toLong()).atZone(zoneId)
         .format(DateTimeFormatter.ofPattern("hh:mm a"))
-    val sunsetTime = Instant.ofEpochSecond(weatherData.sys.sunset.toLong())
-        .atZone(zoneId)
+    val sunsetTime = Instant.ofEpochSecond(weatherData.sys.sunset.toLong()).atZone(zoneId)
         .format(DateTimeFormatter.ofPattern("hh:mm a"))
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "${weatherData.name}, ${weatherData.sys.country}",
@@ -170,7 +181,6 @@ fun WeatherHeader(weatherData: WeatherResponse) {
 @Composable
 fun WeatherIcon(iconCode: String) {
     val iconUrl = "https://openweathermap.org/img/wn/${iconCode}@2x.png"
-
     Image(
         painter = rememberAsyncImagePainter(iconUrl),
         contentDescription = "Weather Icon",
@@ -179,15 +189,12 @@ fun WeatherIcon(iconCode: String) {
 }
 
 @Composable
-@Preview(showBackground = true)
 fun WeatherDetailsCard(weatherData: WeatherResponse) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(R.string.weather_details),
@@ -196,8 +203,7 @@ fun WeatherDetailsCard(weatherData: WeatherResponse) {
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 WeatherDetailItem(
                     icon = Icons.Default.Air,
@@ -227,8 +233,7 @@ fun WeatherDetailsCard(weatherData: WeatherResponse) {
 @Composable
 fun LoadingWeatherState() {
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -237,19 +242,15 @@ fun LoadingWeatherState() {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Loading...",
-                style = MaterialTheme.typography.bodyLarge
+                text = "Loading...", style = MaterialTheme.typography.bodyLarge
             )
         }
     }
 }
 
 @Composable
-@Preview(showBackground = true)
 fun WeatherDetailItem(
-    icon: ImageVector,
-    label: String,
-    value: String
+    icon: ImageVector, label: String, value: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
