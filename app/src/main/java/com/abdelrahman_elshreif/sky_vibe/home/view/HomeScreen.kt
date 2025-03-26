@@ -1,3 +1,5 @@
+@file:Suppress("PreviewAnnotationInFunctionWithParameters")
+
 package com.abdelrahman_elshreif.sky_vibe.home.view
 
 import android.annotation.SuppressLint
@@ -6,6 +8,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
@@ -53,8 +57,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherApp(
-    homeViewModel: HomeViewModel,
-    onRequestPermission: () -> Unit
+    homeViewModel: HomeViewModel
 ) {
     val weatherData by homeViewModel.homeWeatherData.collectAsState(initial = null)
     val isLoading by homeViewModel.isLoading.collectAsState(initial = true)
@@ -70,14 +73,25 @@ fun WeatherApp(
             weatherData != null -> {
                 AnimatedWeatherContent(weatherData = weatherData!!)
             }
+
+            else -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    Text("Unable to fetch weather data", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
         }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AnimatedWeatherContent(
-    weatherData: WeatherResponse
-) {
+fun AnimatedWeatherContent(weatherData: WeatherResponse) {
+
     AnimatedVisibility(visible = true) {
         Column {
             WeatherHeader(weatherData)
@@ -94,8 +108,8 @@ fun HourlyForecastCard() {
     Text("")
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("DefaultLocale")
 @Composable
 fun WeatherHeader(weatherData: WeatherResponse) {
     val timezoneOffset = weatherData.timezone
@@ -118,28 +132,33 @@ fun WeatherHeader(weatherData: WeatherResponse) {
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
+        AnimatedContent(targetState = weatherData.main.temp) { temp ->
+            Text(
+                text = stringResource(R.string.c, String.format("%.1f ", temp)),
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = weatherData.weather.firstOrNull()?.description?.capitalize()
+                    ?: "Weather Unavailable",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            WeatherIcon(weatherData.weather[0].icon)
+        }
 
         Text(
             text = "$date | $currentTime",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
-
-        AnimatedContent(targetState = weatherData.main.temp) { temp ->
-            Text(
-                text = stringResource(R.string.c, String.format("%.1f ", temp)),
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-
-        Text(
-            text = weatherData.weather.firstOrNull()?.description?.capitalize()
-                ?: "Weather Unavailable",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
         Text(
             text = "Sunrise: $sunriseTime | Sunset: $sunsetTime",
             style = MaterialTheme.typography.bodyMedium,
@@ -149,6 +168,18 @@ fun WeatherHeader(weatherData: WeatherResponse) {
 }
 
 @Composable
+fun WeatherIcon(iconCode: String) {
+    val iconUrl = "https://openweathermap.org/img/wn/${iconCode}@2x.png"
+
+    Image(
+        painter = rememberAsyncImagePainter(iconUrl),
+        contentDescription = "Weather Icon",
+        modifier = Modifier.size(64.dp)
+    )
+}
+
+@Composable
+@Preview(showBackground = true)
 fun WeatherDetailsCard(weatherData: WeatherResponse) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -214,6 +245,7 @@ fun LoadingWeatherState() {
 }
 
 @Composable
+@Preview(showBackground = true)
 fun WeatherDetailItem(
     icon: ImageVector,
     label: String,

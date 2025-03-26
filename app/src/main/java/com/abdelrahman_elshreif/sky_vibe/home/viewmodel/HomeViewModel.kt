@@ -2,12 +2,15 @@ package com.abdelrahman_elshreif.sky_vibe.home.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.repo.SkyVibeRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: SkyVibeRepository) : ViewModel() {
+class HomeViewModel(
+    private val repository: SkyVibeRepository
+) : ViewModel() {
 
     private val _homeWeatherData = MutableStateFlow<WeatherResponse?>(null)
     val homeWeatherData = _homeWeatherData.asStateFlow()
@@ -32,4 +35,5 @@ class HomeViewModel(private val repository: SkyVibeRepository) : ViewModel() {
             _isLoading.value = false
         }
     }
+
 }

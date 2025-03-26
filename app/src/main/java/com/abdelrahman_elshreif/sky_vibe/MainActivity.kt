@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.abdelrahman_elshreif.sky_vibe.data.local.ForecastingLocalDataSource
@@ -24,9 +23,36 @@ import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
     private lateinit var locationUtilities: LocationUtilities
     private lateinit var homeViewModel: HomeViewModel
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationUtilities = LocationUtilities(this)
+        homeViewModel = ViewModelProvider(
+            this, HomeViewModelFactory(
+                SkyVibeRepository.getInstance(
+                    ForecastingRemoteDataSource(RetrofitHelper.apiservice),
+                    ForecastingLocalDataSource()
+                )
+            )
+        )[HomeViewModel::class.java]
+        setContent {
+            WeatherApp(homeViewModel)
+        }
+
+        if (locationUtilities.checkLocationAvailability()) {
+            fetchLocationAndWeather()
+        } else {
+            requestLocationPermissions()
+        }
+
+    }
+
+    private fun requestLocationPermissions() {
+        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -39,54 +65,16 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        locationUtilities = LocationUtilities(this)
-
-        homeViewModel = ViewModelProvider(
-            this, HomeViewModelFactory(
-                SkyVibeRepository.getInstance(
-                    ForecastingRemoteDataSource(RetrofitHelper.apiservice),
-                    ForecastingLocalDataSource()
-                )
-            )
-        )[HomeViewModel::class.java]
-
-        setContent {
-            WeatherApp(
-                homeViewModel = homeViewModel,
-                onRequestPermission = { requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) }
-            )
-        }
-
-        if (locationUtilities.checkLocationAvailability()) {
-            fetchLocationAndWeather()
-        } else {
-            requestLocationPermissions()
-        }
-    }
-
-    private fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-            LOCATION_PERMISSION_REQUEST_CODE
-        )
-    }
-
     private fun fetchLocationAndWeather() {
         lifecycleScope.launch {
-            val (location, address) = locationUtilities.fetchLocationAndAddress()
-            if (location != null) {
-                homeViewModel.fetchWeatherData(location.latitude, location.longitude)
-            } else {
-                // Handle location fetch failure
+            val location = locationUtilities.getOrFetchLocation()
+            location.let {
+                if (location != null) {
+                    homeViewModel.fetchWeatherData(location.first, location.second)
+                }
             }
         }
     }
-
 
     private fun openAppSettings() {
         val intent = Intent(
@@ -94,9 +82,5 @@ class MainActivity : ComponentActivity() {
             Uri.fromParts("package", packageName, null)
         )
         startActivity(intent)
-    }
-
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
     }
 }

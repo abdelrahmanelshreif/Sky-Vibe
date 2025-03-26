@@ -42,10 +42,10 @@ android {
 
 dependencies {
 
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.navigation:navigation-compose:2.8.4")
     // Datastore ( Modern convention for SharedPreferences)
-    implementation("androidx.datastore:datastore-preferences-core:1.1.3")
-    implementation("androidx.datastore:datastore-core:1.1.3")
+    implementation ("androidx.datastore:datastore-preferences:1.1.3")
 
 
     implementation("androidx.compose.material:material-icons-extended:$2.8.4")

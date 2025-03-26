@@ -8,46 +8,31 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.location.*
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "location_prefs")
+
 class LocationUtilities(private val context: Context) {
 
     private val fusedClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
-
-    private fun checkPermissions(): Boolean {
-        return (ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED)
-    }
-
-    private fun isLocationEnabled(): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    }
-
-    private fun getAddressFromLocation(lat: Double, lon: Double): String {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        return try {
-            val addresses = geocoder.getFromLocation(lat, lon, 1)
-            addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
-        } catch (ex: Exception) {
-            "Error fetching address: ${ex.message}"
-        }
-    }
+    private val LATITUDE = doublePreferencesKey("latitude")
+    private val LONGITUDE = doublePreferencesKey("longitude")
 
     @SuppressLint("MissingPermission")
     suspend fun getFreshLocation(): Location? {
-        return suspendCancellableCoroutine {
-            continuation ->
+        return suspendCancellableCoroutine { continuation ->
             val locationRequest = LocationRequest.Builder(10000L).apply {
                 setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             }.build()
@@ -64,11 +49,8 @@ class LocationUtilities(private val context: Context) {
                     fusedClient.removeLocationUpdates(this)
                 }
             }
-
             fusedClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
+                locationRequest, locationCallback, Looper.getMainLooper()
             )
 
             continuation.invokeOnCancellation {
@@ -77,7 +59,50 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
+    suspend fun getOrFetchLocation(): Pair<Double, Double>? {
+        val savedLocation = getLocationFromDataStore()
+        if (savedLocation != null) {
+            return savedLocation
+        } else {
+            val (location, _) = fetchLocationAndAddress()
+            if (location != null) {
+                saveLocationToDataStore(location.latitude, location.longitude)
+                return Pair(location.latitude, location.longitude)
+            }
+        }
+        return null
+    }
+
+    fun checkLocationAvailability(): Boolean {
+        return checkPermissions() && isLocationEnabled()
+    }
+
+    private fun checkPermissions(): Boolean {
+        return (ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        )
+    }
+
+    private fun getAddressFromLocation(lat: Double, lon: Double): String {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        return try {
+            val addresses = geocoder.getFromLocation(lat, lon, 1)
+            addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
+        } catch (ex: Exception) {
+            "Error fetching address: ${ex.message}"
+        }
+    }
+
+    private suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
         return try {
             if (!checkLocationAvailability()) {
                 return Pair(null, "Location not available")
@@ -94,7 +119,23 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    fun checkLocationAvailability(): Boolean {
-        return checkPermissions() && isLocationEnabled()
+    private suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
+        return context.dataStore.data.map { preferences ->
+            val latitude = preferences[LATITUDE]
+            val longitude = preferences[LONGITUDE]
+            if (latitude != null && longitude != null) {
+                Pair(latitude, longitude)
+            } else {
+                null
+            }
+        }.firstOrNull()
     }
+
+    private suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
+        context.dataStore.edit { preferences ->
+            preferences[LATITUDE] = latitude
+            preferences[LONGITUDE] = longitude
+        }
+    }
+
 }
