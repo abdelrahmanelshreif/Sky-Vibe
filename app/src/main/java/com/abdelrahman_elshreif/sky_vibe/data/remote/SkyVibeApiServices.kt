@@ -1,7 +1,7 @@
 package com.abdelrahman_elshreif.sky_vibe.data.remote
 
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherForecastResponse
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherForecastResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

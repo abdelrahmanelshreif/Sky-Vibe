@@ -41,9 +41,12 @@ android {
         compose = true
     }
 }
+val nav_version = "2.8.8"
 
 dependencies {
-
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    //Serialization for NavArgs
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.navigation:navigation-compose:2.8.4")
     // Datastore ( Modern convention for SharedPreferences)

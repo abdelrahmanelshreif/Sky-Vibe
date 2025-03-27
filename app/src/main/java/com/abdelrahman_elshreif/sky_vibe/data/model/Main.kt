@@ -1,4 +1,4 @@
-package com.abdelrahman_elshreif.sky_vibe.model
+package com.abdelrahman_elshreif.sky_vibe.data.model
 
 import com.google.gson.annotations.SerializedName
 

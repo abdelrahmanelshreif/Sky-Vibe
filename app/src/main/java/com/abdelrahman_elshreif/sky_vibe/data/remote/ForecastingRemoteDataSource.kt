@@ -1,7 +1,7 @@
 package com.abdelrahman_elshreif.sky_vibe.data.remote
 
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherForecastResponse
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherForecastResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 @Suppress("UNCHECKED_CAST")

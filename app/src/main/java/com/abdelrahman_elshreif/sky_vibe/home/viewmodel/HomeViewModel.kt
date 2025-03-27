@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.abdelrahman_elshreif.sky_vibe.R
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherForecastResponse
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
-import com.abdelrahman_elshreif.sky_vibe.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherForecastResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

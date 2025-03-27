@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -23,10 +22,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbCloudy
@@ -39,21 +37,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
-import com.abdelrahman_elshreif.sky_vibe.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -62,7 +57,7 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun WeatherApp(homeViewModel: HomeViewModel) {
+fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier)    {
 
     val weatherData = homeViewModel.homeWeatherData.collectAsState(null)
     val forecastData = homeViewModel.forecastData.collectAsState(null)
@@ -117,7 +112,7 @@ fun AnimatedWeatherContent(weatherData: WeatherResponse) {
 
 @Composable
 fun HourlyForecastCard() {
-
+    LazyColumn {  }
 }
 
 
