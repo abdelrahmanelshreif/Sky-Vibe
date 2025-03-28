@@ -26,7 +26,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Compress
@@ -98,6 +100,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
             )
+            .verticalScroll(rememberScrollState())
     ) {
         when {
             isLoading.value -> LoadingWeatherState()
@@ -190,12 +193,15 @@ fun WeatherIcon(iconCode: String) {
         contentDescription = "com.abdelrahman_elshreif.sky_vibe.data.model.Weather Icon",
         modifier = Modifier.size(64.dp)
     )
+
 }
 
 @Composable
 fun WeatherDetailsCard(weatherData: WeatherResponse) {
     Card(
-        modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(32.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
@@ -309,18 +315,23 @@ fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>) {
     groupedData.forEach { (date, hourlyList) ->
         Card(
             modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+                .fillMaxWidth()
+                .background(color = Color.Transparent),
+            shape = RoundedCornerShape(16.dp),
+            CardDefaults.cardColors(Color.Transparent)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
+                    .background(Color.Transparent)
             ) {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color.Transparent)
                 ) {
                     items(hourlyList) { hourlyForecastItem ->
                         HourlyForecastItemUI(hourlyForecastItem)
@@ -337,9 +348,10 @@ fun HourlyForecastItemUI(item: HourlyWeather) {
     Card(
         modifier = Modifier
             .width(70.dp)
-            .padding(8.dp),
-        shape = RoundedCornerShape(32.dp),
-
+            .padding(8.dp)
+            .background(color = Color.Transparent),
+        shape = RoundedCornerShape(16.dp),
+        CardDefaults.cardColors(Color.Cyan)
         ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -380,14 +392,15 @@ fun NextDaysForecast(dailyForecastData: List<DailyWeather>) {
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 4.dp, start = 8.dp, bottom = 4.dp)
+            modifier = Modifier.padding(top = 8.dp, start = 8.dp, bottom = 4.dp)
         )
-        LazyColumn(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(dailyForecastData.take(8)) { dailyForecastDataItem ->
-                DailyForecastItemUI(dailyForecastDataItem)
+
+            dailyForecastData.take(8).forEach { dailyWeather ->
+                DailyForecastItemUI(dailyWeather)
             }
         }
     }
@@ -399,54 +412,72 @@ fun NextDaysForecast(dailyForecastData: List<DailyWeather>) {
 fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
+            .fillMaxWidth(),
+
+        shape = RoundedCornerShape(32.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(16.dp)
         ) {
-            //Day Name
-            Text(
-                text = Utility.DateTimeUtil.convertUnixToDate(dailyForecastDataItem.dt),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
 
-            Column(
-                horizontalAlignment = Alignment.End
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Average Temperature
-                Text(
-                    text = stringResource(
-                        R.string.c_forecasting,
-                        dailyForecastDataItem.temp.day.roundToInt()
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(
+                    modifier = Modifier.width(240.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = Utility.DateTimeUtil.convertUnixToDate(dailyForecastDataItem.dt),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = dailyForecastDataItem.summary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.W300
+                    )
 
-                WeatherIcon(dailyForecastDataItem.weather[0].icon)
-                // Min and Max Temperature
-              Row {
 
-                  Text(
-                      text = stringResource(
-                          R.string.degree_at_day_forecast,
-                          dailyForecastDataItem.temp.min.roundToInt(),
-                          dailyForecastDataItem.temp.max.roundToInt()
-                      ),
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                  )
-              }
+                }
 
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.width(72.dp),
+                    verticalArrangement = Arrangement.Center,
+
+                    ) {
+                    Text(
+                        text = stringResource(
+                            R.string.c_forecasting,
+                            dailyForecastDataItem.temp.day.roundToInt()
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    WeatherIcon(dailyForecastDataItem.weather[0].icon)
+
+                    Text(
+                        text = stringResource(
+                            R.string.degree_at_day_forecast,
+                            dailyForecastDataItem.temp.min.roundToInt(),
+                            dailyForecastDataItem.temp.max.roundToInt()
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
 }
+
 

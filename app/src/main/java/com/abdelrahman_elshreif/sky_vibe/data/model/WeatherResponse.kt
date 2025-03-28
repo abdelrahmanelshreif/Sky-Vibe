@@ -90,6 +90,8 @@ data class DailyWeather(
     val sunset: Long,
     @SerializedName("moonrise")
     val moonrise: Long,
+    @SerializedName("summary")
+    val summary: String,
     @SerializedName("moonset")
     val moonset: Long,
     @SerializedName("moon_phase")

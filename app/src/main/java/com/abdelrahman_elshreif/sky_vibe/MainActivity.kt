@@ -31,7 +31,7 @@ import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
 import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
-import com.abdelrahman_elshreif.sky_vibe.navigation.navigationItems
+import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.view.SettingScreen
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 
@@ -71,7 +71,7 @@ fun SkyVibeApp(homeViewModel: HomeViewModel) {
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = Color.White) {
-                navigationItems.forEachIndexed { index, navigationItem ->
+                getNavigationItems().forEachIndexed { index, navigationItem ->
                     NavigationBarItem(
                         selected = selectedNavigationIndex.intValue == index,
                         onClick = {

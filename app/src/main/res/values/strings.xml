@@ -22,4 +22,8 @@
     <string name="next_7_days_forecast">Next 7 Days Forecast</string>
     <string name="degree_at_day_forecast">%1$s°C / %2$s°C</string>
     <string name="min_max">Min/Max</string>
+    <string name="home">Home</string>
+    <string name="favourite">Favourite</string>
+    <string name="alarm">Alarm</string>
+    <string name="settings">Settings</string>
 </resources>
