@@ -17,4 +17,9 @@
     <string name="hpa">%1$s hPa</string>
     <string name="m_s">%1$s m/s</string>
     <string name="c">%1$s°C</string>
+    <string name="c_forecasting">%1$s°C</string>
+    <string name="today_hourly_details">Daily Details</string>
+    <string name="next_7_days_forecast">Next 7 Days Forecast</string>
+    <string name="degree_at_day_forecast">%1$s°C / %2$s°C</string>
+    <string name="min_max">Min/Max</string>
 </resources>

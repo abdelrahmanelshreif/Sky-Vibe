@@ -2,9 +2,8 @@ package com.abdelrahman_elshreif.sky_vibe.data.repo
 
 import android.util.Log
 import com.abdelrahman_elshreif.sky_vibe.data.local.ForecastingLocalDataSource
-import com.abdelrahman_elshreif.sky_vibe.data.remote.ForecastingRemoteDataSource
-import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherForecastResponse
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.remote.ForecastingRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -32,18 +31,9 @@ class SkyVibeRepository private constructor(
         flow {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon)
             emit(response)
-        }.catch { ex ->
-            Log.i("TAG", "getWeatherByCoordinates: ${ex.message}")
+        }.catch {
             emit(null)
         }
 
-    fun getForecastDataByCoordinates(lat: Double, lon: Double): Flow<WeatherForecastResponse?> =
-        flow {
-            val response = remoteDataSource.getForecastDataOfCoordinates(lat, lon)
-            emit(response)
-        }.catch { ex ->
-            Log.i("TAG", "getForecastDataByCoordinates: ${ex.message}")
-            emit(null)
-        }
 
 }

@@ -1,8 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe.data.remote
 
-import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherForecastResponse
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
-import kotlinx.coroutines.flow.Flow
 
 @Suppress("UNCHECKED_CAST")
 class ForecastingRemoteDataSource(private val services: SkyVibeApiServices) {
@@ -14,11 +12,5 @@ class ForecastingRemoteDataSource(private val services: SkyVibeApiServices) {
         return services.getWeatherByCoordinates(lat, lon).body()
     }
 
-    suspend fun getForecastDataOfCoordinates(
-        lat:Double,
-        lon:Double
-    ): WeatherForecastResponse? {
-        return services.getForecastByCoordinates(lat,lon).body()
-    }
 
 }

@@ -9,12 +9,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,12 +22,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbCloudy
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,28 +44,33 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
 import com.abdelrahman_elshreif.sky_vibe.R
-import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
+import com.abdelrahman_elshreif.sky_vibe.data.model.DailyWeather
+import com.abdelrahman_elshreif.sky_vibe.data.model.HourlyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
+import com.abdelrahman_elshreif.sky_vibe.utils.Utility
+import kotlin.math.roundToInt
 
+fun Context.hasPermission(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier)    {
+fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
 
     val weatherData = homeViewModel.homeWeatherData.collectAsState(null)
-    val forecastData = homeViewModel.forecastData.collectAsState(null)
     val isLoading = homeViewModel.isLoading.collectAsState(true)
 
     val context = LocalContext.current
@@ -70,7 +80,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier)    {
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-//            homeViewModel.fetchLocation()
+
         }
     }
     LaunchedEffect(Unit) {
@@ -78,67 +88,66 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier)    {
             permissionLauncher.launch(locationPermission)
         }
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFe9e9e9))
-            .padding(16.dp)
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(Color(0xFF3C6FD1), Color(0xFF72B5FF)),
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, Float.POSITIVE_INFINITY)
+                )
+            )
     ) {
         when {
             isLoading.value -> LoadingWeatherState()
-            weatherData.value != null -> AnimatedWeatherContent(weatherData.value!!)
+            weatherData.value != null -> HomeContent(weatherData.value!!)
         }
+
     }
 }
 
-fun Context.hasPermission(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AnimatedWeatherContent(weatherData: WeatherResponse) {
-
-    AnimatedVisibility(visible = true) {
-        Column {
+fun HomeContent(
+    weatherData: WeatherResponse,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             WeatherHeader(weatherData)
             Spacer(modifier = Modifier.height(16.dp))
             WeatherDetailsCard(weatherData)
             Spacer(modifier = Modifier.height(16.dp))
-            HourlyForecastCard()
+            TodayHourlyForecast(hourlyForecastData = weatherData.hourly)
+            NextDaysForecast(dailyForecastData = weatherData.daily)
         }
     }
 }
-
-@Composable
-fun HourlyForecastCard() {
-    LazyColumn {  }
-}
-
 
 @SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherHeader(weatherData: WeatherResponse) {
-
-    val timezoneOffset = weatherData.timezone
-    val zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(timezoneOffset))
-    val currentTime = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("hh:mm a"))
-    val date = Instant.now().atZone(zoneId).format(DateTimeFormatter.ofPattern("EEEE, MMM d yyyy"))
-    val sunriseTime = Instant.ofEpochSecond(weatherData.sys.sunrise.toLong()).atZone(zoneId)
-        .format(DateTimeFormatter.ofPattern("hh:mm a"))
-    val sunsetTime = Instant.ofEpochSecond(weatherData.sys.sunset.toLong()).atZone(zoneId)
-        .format(DateTimeFormatter.ofPattern("hh:mm a"))
-
+    val date = Utility.DateTimeUtil.convertUnixToDate(weatherData.current.dt)
+    val currentTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.dt)
+    val sunriseTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.sunrise)
+    val sunsetTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.sunset)
+    val zone = Utility.TimeZoneUtil.convertTimezoneToCityLocation(weatherData.timezone)
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "${weatherData.name}, ${weatherData.sys.country}",
+            text = zone,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        AnimatedContent(targetState = weatherData.main.temp) { temp ->
+        AnimatedContent(targetState = weatherData.current.temp) { temp ->
             Text(
                 text = stringResource(R.string.c, String.format("%.1f ", temp)),
                 style = MaterialTheme.typography.displayMedium,
@@ -152,12 +161,12 @@ fun WeatherHeader(weatherData: WeatherResponse) {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = weatherData.weather.firstOrNull()?.description?.capitalize()
-                    ?: "Weather Unavailable",
+                text = weatherData.current.weather.firstOrNull()?.description?.capitalize()
+                    ?: "com.abdelrahman_elshreif.sky_vibe.data.model.Weather Unavailable",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            WeatherIcon(weatherData.weather[0].icon)
+            WeatherIcon(weatherData.current.weather[0].icon)
         }
 
         Text(
@@ -178,7 +187,7 @@ fun WeatherIcon(iconCode: String) {
     val iconUrl = "https://openweathermap.org/img/wn/${iconCode}@2x.png"
     Image(
         painter = rememberAsyncImagePainter(iconUrl),
-        contentDescription = "Weather Icon",
+        contentDescription = "com.abdelrahman_elshreif.sky_vibe.data.model.Weather Icon",
         modifier = Modifier.size(64.dp)
     )
 }
@@ -203,22 +212,27 @@ fun WeatherDetailsCard(weatherData: WeatherResponse) {
                 WeatherDetailItem(
                     icon = Icons.Default.Air,
                     label = stringResource(R.string.wind),
-                    value = stringResource(R.string.m_s, weatherData.wind.speed)
+                    value = stringResource(R.string.m_s, weatherData.current.windSpeed)
                 )
                 WeatherDetailItem(
                     icon = Icons.Default.WbCloudy,
                     label = stringResource(R.string.clouds),
-                    value = "${weatherData.clouds.all}% "
+                    value = "${weatherData.current.clouds}% "
+                )
+                WeatherDetailItem(
+                    icon = Icons.Default.WbSunny,
+                    label = stringResource(R.string.uv_index),
+                    value = "${weatherData.current.uvi}% "
                 )
                 WeatherDetailItem(
                     icon = Icons.Default.WaterDrop,
                     label = stringResource(R.string.humidity),
-                    value = "${weatherData.main.humidity}%"
+                    value = "${weatherData.current.humidity}%"
                 )
                 WeatherDetailItem(
                     icon = Icons.Default.Compress,
                     label = stringResource(R.string.pressure),
-                    value = stringResource(R.string.hpa, weatherData.main.pressure)
+                    value = stringResource(R.string.hpa, weatherData.current.pressure)
                 )
             }
         }
@@ -228,7 +242,8 @@ fun WeatherDetailsCard(weatherData: WeatherResponse) {
 @Composable
 fun LoadingWeatherState() {
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -245,7 +260,9 @@ fun LoadingWeatherState() {
 
 @Composable
 fun WeatherDetailItem(
-    icon: ImageVector, label: String, value: String
+    icon: ImageVector,
+    label: String,
+    value: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -268,3 +285,168 @@ fun WeatherDetailItem(
         )
     }
 }
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>) {
+    val todayDate = hourlyForecastData.firstOrNull()?.let {
+        Utility.DateTimeUtil.convertUnixToDate(it.dt)
+    }
+    val groupedData = hourlyForecastData
+        .groupBy {
+            Utility.DateTimeUtil.convertUnixToDate(it.dt)
+        }
+        .filterKeys { it == todayDate }
+
+    Text(
+        text = stringResource(R.string.today_hourly_details),
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+    )
+    groupedData.forEach { (date, hourlyList) ->
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(hourlyList) { hourlyForecastItem ->
+                        HourlyForecastItemUI(hourlyForecastItem)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun HourlyForecastItemUI(item: HourlyWeather) {
+    Card(
+        modifier = Modifier
+            .width(70.dp)
+            .padding(8.dp),
+        shape = RoundedCornerShape(32.dp),
+
+        ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .width(70.dp)
+                .padding(4.dp)
+        ) {
+            Text(
+                text = Utility.DateTimeUtil.convertUnixToDateHour(item.dt),
+                style = MaterialTheme.typography.bodySmall
+            )
+            WeatherIcon(
+                iconCode = item.weather[0].icon
+            )
+
+            Text(
+                text = stringResource(R.string.c_forecasting, item.temp.roundToInt()),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun NextDaysForecast(dailyForecastData: List<DailyWeather>) {
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.next_7_days_forecast),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 4.dp, start = 8.dp, bottom = 4.dp)
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(dailyForecastData.take(8)) { dailyForecastDataItem ->
+                DailyForecastItemUI(dailyForecastDataItem)
+            }
+        }
+    }
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            //Day Name
+            Text(
+                text = Utility.DateTimeUtil.convertUnixToDate(dailyForecastDataItem.dt),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                // Average Temperature
+                Text(
+                    text = stringResource(
+                        R.string.c_forecasting,
+                        dailyForecastDataItem.temp.day.roundToInt()
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                WeatherIcon(dailyForecastDataItem.weather[0].icon)
+                // Min and Max Temperature
+              Row {
+
+                  Text(
+                      text = stringResource(
+                          R.string.degree_at_day_forecast,
+                          dailyForecastDataItem.temp.min.roundToInt(),
+                          dailyForecastDataItem.temp.max.roundToInt()
+                      ),
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                  )
+              }
+
+            }
+        }
+    }
+}
+

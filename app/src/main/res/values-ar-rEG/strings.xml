@@ -18,4 +18,6 @@
     <string name="hpa">%1$s هيكتوباسكال</string>
     <string name="m_s">%1$s  متر/ث</string>
     <string name="c">%1$sس°</string>
+    <string name="c_forecasting">%1$s°C</string>
+    <string name="today_hourly_details">تفاصيل اليوم</string>
 </resources>
