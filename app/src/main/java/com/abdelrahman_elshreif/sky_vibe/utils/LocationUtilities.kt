@@ -73,7 +73,7 @@ class LocationUtilities(private val context: Context) {
         return null
     }
 
-    fun checkLocationAvailability(): Boolean {
+    private fun checkLocationAvailability(): Boolean {
         return checkPermissions() && isLocationEnabled()
     }
 

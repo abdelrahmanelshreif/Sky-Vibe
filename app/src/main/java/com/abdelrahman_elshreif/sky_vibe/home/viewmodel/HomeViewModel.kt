@@ -59,5 +59,10 @@ class HomeViewModel(
             }
         }
     }
+
+    fun fetchLocationAndWeather() {
+        fetchLocation()
+        fetchWeatherData(_location.value?.first ?:0.0 , _location.value?.second ?: 0.0)
+    }
 }
 

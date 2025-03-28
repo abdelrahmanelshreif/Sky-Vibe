@@ -2,9 +2,13 @@ package com.abdelrahman_elshreif.sky_vibe.home.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -62,7 +66,9 @@ import com.abdelrahman_elshreif.sky_vibe.data.model.HourlyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.utils.Utility
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import kotlin.math.roundToInt
+import kotlin.time.Duration
 
 fun Context.hasPermission(permission: String): Boolean {
     return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
@@ -71,7 +77,6 @@ fun Context.hasPermission(permission: String): Boolean {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
-
     val weatherData = homeViewModel.homeWeatherData.collectAsState(null)
     val isLoading = homeViewModel.isLoading.collectAsState(true)
 
@@ -82,15 +87,20 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
+            homeViewModel.fetchLocationAndWeather()
 
         }
     }
     LaunchedEffect(Unit) {
         if (!context.hasPermission(locationPermission)) {
             permissionLauncher.launch(locationPermission)
+        } else {
+            homeViewModel.fetchLocationAndWeather()
+
+            Toast.makeText(context, "Give Me Location Permission", Toast.LENGTH_SHORT).show()
         }
     }
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -100,16 +110,25 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
             )
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         when {
             isLoading.value -> LoadingWeatherState()
-            weatherData.value != null -> HomeContent(weatherData.value!!)
+
+            weatherData.value == null -> Toast.makeText(
+                context,
+                "Give Me Location Permission",
+                Toast.LENGTH_SHORT
+            ).show()
+
+//            weatherData.value != null -> HomeContent(weatherData.value!!)
         }
 
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -352,7 +371,7 @@ fun HourlyForecastItemUI(item: HourlyWeather) {
             .background(color = Color.Transparent),
         shape = RoundedCornerShape(16.dp),
         CardDefaults.cardColors(Color.Cyan)
-        ) {
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -439,7 +458,7 @@ fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = dailyForecastDataItem.summary,
+                        text = dailyForecastDataItem.weather[0].description,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.W300
                     )
