@@ -1,17 +1,14 @@
 package com.abdelrahman_elshreif.sky_vibe.settings.viewmodel
 
-import android.app.Application
+
 import android.content.Context
-import androidx.compose.ui.res.stringResource
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
+import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -32,53 +29,58 @@ class SettingViewModel(context: Context) : ViewModel() {
     private val _language = MutableStateFlow(R.string.english)
     val language = _language.asStateFlow()
 
-    val optionsList = listOf(
-        R.string.temp_unit to listOf(R.string.celsius_c, R.string.kelvin_k, R.string.fahrenheit_f),
-        R.string.location to listOf(R.string.gps, R.string.map),
-        R.string.wind_speed_unit to listOf(R.string.meter_sec, R.string.mile_hour),
-        R.string.language to listOf(R.string.english, R.string.arabic)
-    )
-    private val _selectedOptions = MutableStateFlow(listOf(0, 0, 0, 0))
-    val selectedOptions = _selectedOptions.asStateFlow()
+
+    val tempOptions = listOf(R.string.celsius_c, R.string.kelvin_k, R.string.fahrenheit_f)
+    val locationOptions = listOf(R.string.gps, R.string.map)
+    val windSpeedOptions = listOf(R.string.meter_sec, R.string.mile_hour)
+    val languageOptions = listOf(R.string.english, R.string.arabic)
+
 
     init {
-        // NOW WE LOAD THE DATA FROM DATASTORE
         viewModelScope.launch {
             settingDataStore.tempUnit.collect {
-                _tempUnit.value = it
+                _tempUnit.value = SettingOption.toResourceId(it)
             }
         }
 
         viewModelScope.launch {
             settingDataStore.language.collect {
-                _language.value = it
+                _language.value = SettingOption.toResourceId(it)
             }
         }
 
         viewModelScope.launch {
             settingDataStore.windSpeedUnit.collect {
-                _windUnit.value = it
+                _windUnit.value = SettingOption.toResourceId(it)
             }
         }
 
         viewModelScope.launch {
             settingDataStore.locationMethod.collect {
-                _locationMethod.value = it
+                _locationMethod.value = SettingOption.toResourceId(it)
             }
         }
     }
 
 
-    private fun saveSetting(key: Preferences.Key<String>, value: String) {
-        viewModelScope.launch {
-            settingDataStore.saveSetting(key, value)
-        }
-    }
-
     fun updateSelection(rowIndex: Int, selectedIndex: Int) {
-        val newList = _selectedOptions.value.toMutableList().also { it[rowIndex] = selectedIndex }
-        _selectedOptions.value = newList
+
+        require(rowIndex in 0..3) {
+            "Invalid row index"
+        }
 
 
+        viewModelScope.launch {
+            try {
+                when (rowIndex) {
+                    0 -> settingDataStore.saveTempUnit(tempOptions[selectedIndex])
+                    1 -> settingDataStore.saveLocationMethod(locationOptions[selectedIndex])
+                    2 -> settingDataStore.saveWindSpeedUnit(windSpeedOptions[selectedIndex])
+                    3 -> settingDataStore.saveLanguage(languageOptions[selectedIndex])
+                }
+            } catch (e: Exception) {
+                println("Error saving setting: ${e.message}")
+            }
+        }
     }
 }

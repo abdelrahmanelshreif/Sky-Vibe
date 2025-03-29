@@ -23,23 +23,54 @@ class SettingDataStore(private val context: Context) {
     }
 
     val tempUnit: Flow<String> = context.dataStore.data.map {
-        it[TEMP_UNIT_KEY] ?: "Celsius"
+        it[TEMP_UNIT_KEY] ?: SettingOption.CELSIUS.storedValue
     }
+
     val windSpeedUnit: Flow<String> = context.dataStore.data.map {
-        it[WIND_UNIT_KEY] ?: "meter/sec"
-    }
-    val language = context.dataStore.data.map {
-        it[LANGUAGE_KEY] ?: "English"
+        it[WIND_UNIT_KEY] ?: SettingOption.METER_SEC.storedValue
     }
 
-    val locationMethod = context.dataStore.data.map {
-        it[LOCATION_METHOD_KEY] ?: "GPS"
+    val language: Flow<String> = context.dataStore.data.map {
+        it[LANGUAGE_KEY] ?: SettingOption.ENGLISH.storedValue
     }
 
-    suspend fun saveSetting(key: Preferences.Key<String>, value: String) {
+    val locationMethod: Flow<String> = context.dataStore.data.map {
+        it[LOCATION_METHOD_KEY] ?: SettingOption.GPS.storedValue
+    }
+
+    suspend fun saveTempUnit(resourceId: Int) {
+        val storedValue = SettingOption.fromResourceId(resourceId)
         context.dataStore.edit { pref ->
-            pref[key] = value
+            pref[TEMP_UNIT_KEY] = storedValue
         }
     }
 
+    suspend fun saveWindSpeedUnit(resourceId: Int) {
+        val storedValue = SettingOption.fromResourceId(resourceId)
+        context.dataStore.edit { pref ->
+            pref[WIND_UNIT_KEY] = storedValue
+        }
+    }
+
+    suspend fun saveLanguage(resourceId: Int) {
+        val storedValue = SettingOption.fromResourceId(resourceId)
+        context.dataStore.edit { pref ->
+            pref[LANGUAGE_KEY] = storedValue
+        }
+    }
+
+    suspend fun saveLocationMethod(resourceId: Int) {
+        val storedValue = SettingOption.fromResourceId(resourceId)
+        context.dataStore.edit { pref ->
+            pref[LOCATION_METHOD_KEY] = storedValue
+        }
+    }
+
+
+    suspend fun saveSetting(key: Preferences.Key<String>, resourceId: Int) {
+        val storedValue = SettingOption.fromResourceId(resourceId)
+        context.dataStore.edit { pref ->
+            pref[key] = storedValue
+        }
+    }
 }
