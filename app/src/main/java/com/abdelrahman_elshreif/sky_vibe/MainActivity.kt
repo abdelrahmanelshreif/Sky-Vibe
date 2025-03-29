@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +34,8 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
 import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
 import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.view.SettingScreen
+import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
+import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 
 class MainActivity : ComponentActivity() {
@@ -46,7 +49,7 @@ class MainActivity : ComponentActivity() {
 
         locationUtilities = LocationUtilities(this)
 
-        val factory = HomeViewModelFactory(
+        val homeFactory = HomeViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice),
                 ForecastingLocalDataSource()
@@ -54,17 +57,22 @@ class MainActivity : ComponentActivity() {
             locationUtilities
         )
 
-        val homeViewModel: HomeViewModel by viewModels { factory }
+        val settingFactory = SettingViewModelFactory(
+            this@MainActivity
+        )
+
+        val homeViewModel: HomeViewModel by viewModels {homeFactory }
+        val settingViewModel: SettingViewModel by viewModels { settingFactory }
 
         setContent {
-            SkyVibeApp(homeViewModel)
+            SkyVibeApp(homeViewModel,settingViewModel)
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SkyVibeApp(homeViewModel: HomeViewModel) {
+fun SkyVibeApp(homeViewModel: HomeViewModel,settingViewModel:SettingViewModel) {
     val navController = rememberNavController()
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
@@ -118,7 +126,7 @@ fun SkyVibeApp(homeViewModel: HomeViewModel) {
                     AlarmScreen()
                 }
                 composable(Screen.Settings.route) {
-                    SettingScreen()
+                    SettingScreen(settingViewModel)
                 }
             }
         }

@@ -12,7 +12,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.abdelrahman_elshreif.sky_vibe.data.model.LocationHolder
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -29,6 +31,8 @@ class LocationUtilities(private val context: Context) {
         LocationServices.getFusedLocationProviderClient(context)
     private val LATITUDE = doublePreferencesKey("latitude")
     private val LONGITUDE = doublePreferencesKey("longitude")
+    private val ADDRESS = stringPreferencesKey("address")
+
 
     @SuppressLint("MissingPermission")
     suspend fun getFreshLocation(): Location? {
@@ -135,6 +139,26 @@ class LocationUtilities(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[LATITUDE] = latitude
             preferences[LONGITUDE] = longitude
+        }
+    }
+
+    suspend fun saveLocationFromMapToDataStore(
+        lat: Double,
+        lon: Double,
+        address:String? = null
+    ){
+        val locationHolder = LocationHolder(
+            latitude = lat,
+            longitude = lon,
+            address = address
+        )
+
+        context.dataStore.edit {preferences->
+            preferences[LATITUDE] = locationHolder.latitude
+            preferences[LONGITUDE] = locationHolder.longitude
+            locationHolder.address?.let {
+                preferences[ADDRESS] = it
+            }
         }
     }
 

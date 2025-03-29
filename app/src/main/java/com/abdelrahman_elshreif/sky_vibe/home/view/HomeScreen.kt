@@ -85,23 +85,20 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            homeViewModel.fetchLocationAndWeather()
+    ) {}
 
-        }
-    }
+
     LaunchedEffect(Unit) {
         if (!context.hasPermission(locationPermission)) {
             permissionLauncher.launch(locationPermission)
         } else {
             homeViewModel.fetchLocationAndWeather()
-
-            Toast.makeText(context, "Give Me Location Permission", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, "Give Me Location Permission", Toast.LENGTH_SHORT).show()
         }
     }
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
@@ -117,14 +114,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
     ) {
         when {
             isLoading.value -> LoadingWeatherState()
-
-            weatherData.value == null -> Toast.makeText(
-                context,
-                "Give Me Location Permission",
-                Toast.LENGTH_SHORT
-            ).show()
-
-//            weatherData.value != null -> HomeContent(weatherData.value!!)
+            weatherData.value != null -> HomeContent(weatherData.value!!)
         }
 
     }
