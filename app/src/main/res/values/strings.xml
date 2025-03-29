@@ -31,8 +31,8 @@
     <string name="fahrenheit_f">Fahrenheit °F</string>
     <string name="kelvin_k">Kelvin °K</string>
     <string name="celsius_c">Celsius °C</string>
-    <string name="mile_hour">mile/hour</string>
-    <string name="meter_sec">meter/sec</string>
+    <string name="mile_hour">mi/hr</string>
+    <string name="meter_sec">m/s</string>
     <string name="english">English</string>
     <string name="arabic">Arabic</string>
     <string name="temp_unit">Temp Unit</string>

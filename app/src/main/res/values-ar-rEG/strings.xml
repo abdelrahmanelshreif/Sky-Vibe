@@ -27,4 +27,17 @@
     <string name="favourite">المفضلة</string>
     <string name="alarm">التنبيه</string>
     <string name="settings">الاعدادات</string>
+    <string name="gps">نظام تحديد المواقع العالمي (GPS)</string>
+    <string name="map">رسم خريطة</string>
+    <string name="fahrenheit_f">فهرنهايت °ف</string>
+    <string name="kelvin_k">كلفن °ك</string>
+    <string name="celsius_c">درجة مئوية °س</string>
+    <string name="mile_hour">ميل/ساعة</string>
+    <string name="meter_sec">متر/ثانية</string>
+    <string name="english">الإنجليزية</string>
+    <string name="arabic">العربية</string>
+    <string name="temp_unit">وحدة درجة الحرارة</string>
+    <string name="location">الموقع</string>
+    <string name="wind_speed_unit">وحدة سرعة الرياح</string>
+    <string name="language">لغة</string>
 </resources>
