@@ -38,18 +38,16 @@ class MainActivity : ComponentActivity() {
             ),
             locationUtilities
         )
-        val settingFactory = SettingViewModelFactory(this)
+        val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }
         val homeViewModel: HomeViewModel by viewModels { homeFactory }
         // End initializing ViewModels
         lifecycleScope.launch {
             settingViewModel.languageChangeEvent.collect { languageCode ->
-                Log.d("MainActivity", "Language change event received: $languageCode")
                 SettingDataStore(this@MainActivity).saveLanguageToSharedPrefs(languageCode)
                 recreate()
             }
         }
-
         setContent {
             SkyVibeApp(homeViewModel, settingViewModel)
         }
