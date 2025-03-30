@@ -42,13 +42,18 @@ class HomeViewModel(
             _isLoading.value = true
 
 
-            val tempUnit = settingDataStore.tempUnit.firstOrNull() ?: SettingOption.CELSIUS.storedValue
-            val windSpeedUnit = settingDataStore.windSpeedUnit.firstOrNull() ?: SettingOption.METER_SEC.storedValue
+            val tempUnit =
+                settingDataStore.tempUnit.firstOrNull() ?: SettingOption.CELSIUS.storedValue
+            val windSpeedUnit =
+                settingDataStore.windSpeedUnit.firstOrNull() ?: SettingOption.METER_SEC.storedValue
             val language = settingDataStore.language.firstOrNull()?.let {
                 if (it == "english") "en" else "ar"
             } ?: "en"
 
-            Log.i("TAG", "fetchWeatherData: TempUnit=$tempUnit, WindSpeedUnit=$windSpeedUnit, Language=$language")
+            Log.i(
+                "TAG",
+                "fetchWeatherData: TempUnit=$tempUnit, WindSpeedUnit=$windSpeedUnit, Language=$language"
+            )
 
             repository.getWeatherByCoordinates(lat, lon, lang = language)
                 .catch { ex ->
@@ -59,7 +64,10 @@ class HomeViewModel(
                     weatherData!!.copy(
                         current = weatherData.current.copy(
                             temp = convertTemperature(weatherData.current.temp, tempUnit),
-                            windSpeed = convertWindSpeed(weatherData.current.windSpeed, windSpeedUnit)
+                            windSpeed = convertWindSpeed(
+                                weatherData.current.windSpeed,
+                                windSpeedUnit
+                            )
                         ),
                         hourly = weatherData.hourly.map { hourlyData ->
                             hourlyData.copy(
@@ -70,7 +78,8 @@ class HomeViewModel(
                         daily = weatherData.daily.map { dailyData ->
                             dailyData.copy(
                                 temp = dailyData.temp.copy(
-                                    min = convertTemperature(dailyData.temp.min, tempUnit)
+                                    min = convertTemperature(dailyData.temp.min, tempUnit),
+                                    max = convertTemperature(dailyData.temp.max, tempUnit)
                                 ),
                                 windSpeed = convertWindSpeed(dailyData.windSpeed, windSpeedUnit)
                             )
