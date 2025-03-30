@@ -16,7 +16,6 @@ private val Context.dataStore by preferencesDataStore(name = "setting_prefs")
 
 class SettingDataStore(private val context: Context) {
 
-
     companion object {
         val TEMP_UNIT_KEY = stringPreferencesKey("temp_unit")
         val WIND_UNIT_KEY = stringPreferencesKey("wind_unit")

@@ -17,9 +17,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 
-class SettingViewModel(context: Context) : ViewModel() {
+class SettingViewModel(private val settingDataStore: SettingDataStore) : ViewModel() {
 
-    private val settingDataStore = SettingDataStore(context)
 
     private val _tempUnit = MutableStateFlow(R.string.celsius_c)
     val tempUnit = _tempUnit.asStateFlow()
@@ -56,9 +55,6 @@ class SettingViewModel(context: Context) : ViewModel() {
         }
     }
 
-//    private val _selectedOptions = MutableStateFlow(listOf(0, 0, 0, 0))
-//    val selectedOptions = _selectedOptions.asStateFlow()
-
     init {
         viewModelScope.launch {
             settingDataStore.tempUnit.collect {
@@ -86,11 +82,6 @@ class SettingViewModel(context: Context) : ViewModel() {
     }
 
     fun updateSelection(rowIndex: Int, selectedIndex: Int) {
-
-//        val newOptions = _selectedOptions.value.toMutableList()
-//        newOptions[rowIndex] = selectedIndex
-//        _selectedOptions.value = newOptions
-
         viewModelScope.launch {
             try {
                 when (rowIndex) {
