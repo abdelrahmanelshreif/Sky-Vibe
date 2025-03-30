@@ -23,7 +23,6 @@ class SettingDataStore(private val context: Context) {
         val LANGUAGE_KEY = stringPreferencesKey("language")
         val LOCATION_METHOD_KEY = stringPreferencesKey("location_method")
 
-
         private const val PREF_NAME = "settings_pref"
         private const val PREF_LANGUAGE_KEY = "language"
     }

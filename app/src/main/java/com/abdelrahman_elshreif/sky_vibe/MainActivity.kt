@@ -29,9 +29,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
+        // initializing ViewModels
         locationUtilities = LocationUtilities(this)
-
         val homeFactory = HomeViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice),
@@ -39,12 +38,10 @@ class MainActivity : ComponentActivity() {
             ),
             locationUtilities
         )
-
         val settingFactory = SettingViewModelFactory(this)
         val settingViewModel: SettingViewModel by viewModels { settingFactory }
-
         val homeViewModel: HomeViewModel by viewModels { homeFactory }
-
+        // End initializing ViewModels
         lifecycleScope.launch {
             settingViewModel.languageChangeEvent.collect { languageCode ->
                 Log.d("MainActivity", "Language change event received: $languageCode")

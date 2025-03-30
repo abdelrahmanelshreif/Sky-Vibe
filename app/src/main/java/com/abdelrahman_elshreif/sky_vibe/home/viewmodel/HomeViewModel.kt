@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.google.type.Date
 import kotlinx.coroutines.flow.*
@@ -16,8 +17,9 @@ import java.time.format.DateTimeFormatter
 
 class HomeViewModel(
     private val repository: SkyVibeRepository,
-    private val locationUtilities: LocationUtilities
+    private val locationUtilities: LocationUtilities,
 ) : ViewModel() {
+
 
     private val _homeWeatherData = MutableStateFlow<WeatherResponse?>(null)
     val homeWeatherData = _homeWeatherData.asStateFlow()

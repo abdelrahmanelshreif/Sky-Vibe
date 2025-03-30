@@ -56,9 +56,8 @@ class SettingViewModel(context: Context) : ViewModel() {
         }
     }
 
-
-    private val _selectedOptions = MutableStateFlow(listOf(0, 0, 0, 0))
-    val selectedOptions = _selectedOptions.asStateFlow()
+//    private val _selectedOptions = MutableStateFlow(listOf(0, 0, 0, 0))
+//    val selectedOptions = _selectedOptions.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -88,9 +87,9 @@ class SettingViewModel(context: Context) : ViewModel() {
 
     fun updateSelection(rowIndex: Int, selectedIndex: Int) {
 
-        val newOptions = _selectedOptions.value.toMutableList()
-        newOptions[rowIndex] = selectedIndex
-        _selectedOptions.value = newOptions
+//        val newOptions = _selectedOptions.value.toMutableList()
+//        newOptions[rowIndex] = selectedIndex
+//        _selectedOptions.value = newOptions
 
         viewModelScope.launch {
             try {
