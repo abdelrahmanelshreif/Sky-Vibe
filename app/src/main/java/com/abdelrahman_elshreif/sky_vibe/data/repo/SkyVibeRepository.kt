@@ -35,5 +35,27 @@ class SkyVibeRepository private constructor(
             emit(null)
         }
 
+    fun getWeatherByCoordinates(lat: Double, lon: Double, lang: String): Flow<WeatherResponse?> =
+        flow {
+            val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang)
+            emit(response)
+        }.catch {
+            emit(null)
+        }
+
+    fun getWeatherByCoordinates(
+        lat: Double,
+        lon: Double,
+        lang: String,
+        unit: String
+    ): Flow<WeatherResponse?> =
+        flow {
+            val response =
+                remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang, unit = unit)
+            emit(response)
+        }.catch {
+            emit(null)
+        }
+
 
 }

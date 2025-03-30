@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice),
                 ForecastingLocalDataSource()
             ),
-            locationUtilities
+            locationUtilities,
+            SettingDataStore(this)
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }

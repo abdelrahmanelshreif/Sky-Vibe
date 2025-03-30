@@ -16,10 +16,10 @@ interface SkyVibeApiServices {
     suspend fun getWeatherByCoordinates(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
-        @Query("exclude") exclude: String = "minutely",
         @Query("units") units: String = "metric",
-        @Query("lang") language: String = "ar",
-        @Query("appid") apiKey: String = APIKEY
+        @Query("lang") language: String = "en",
+        @Query("appid") apiKey: String = APIKEY,
+        @Query("exclude") exclude: String = "minutely"
     ): Response<WeatherResponse>
 
 
