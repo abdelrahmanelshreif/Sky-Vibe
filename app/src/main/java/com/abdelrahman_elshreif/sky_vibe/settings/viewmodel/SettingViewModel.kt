@@ -3,12 +3,12 @@ package com.abdelrahman_elshreif.sky_vibe.settings.viewmodel
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
-import com.abdelrahman_elshreif.sky_vibe.utils.LanguageUtil
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -37,10 +37,12 @@ class SettingViewModel(context: Context) : ViewModel() {
     private val _languageChangeEvent = MutableSharedFlow<String>(replay = 0)
     val languageChangeEvent = _languageChangeEvent.asSharedFlow()
 
-    private val languageCodeMap = mapOf(
-        R.string.english to "en",
-        R.string.arabic to "ar"
-    )
+    companion object {
+        val languageCodeMap = mapOf(
+            R.string.english to "en",
+            R.string.arabic to "ar"
+        )
+    }
 
     val tempOptions = listOf(R.string.celsius_c, R.string.kelvin_k, R.string.fahrenheit_f)
     val locationOptions = listOf(R.string.gps, R.string.map)
@@ -53,6 +55,7 @@ class SettingViewModel(context: Context) : ViewModel() {
             _languageChangeEvent.emit(languageCode)
         }
     }
+
 
     private val _selectedOptions = MutableStateFlow(listOf(0, 0, 0, 0))
     val selectedOptions = _selectedOptions.asStateFlow()
@@ -97,7 +100,8 @@ class SettingViewModel(context: Context) : ViewModel() {
                     2 -> settingDataStore.saveWindSpeedUnit(windSpeedOptions[selectedIndex])
                     3 -> {
                         settingDataStore.saveLanguage(languageOptions[selectedIndex])
-                        applyLanguage(selectedIndex)
+                        settingDataStore.saveLanguage(languageOptions[selectedIndex])
+                        applyLanguage(languageOptions[selectedIndex])
                     }
                 }
             } catch (e: Exception) {

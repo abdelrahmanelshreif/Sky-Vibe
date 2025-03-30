@@ -1,37 +1,31 @@
-package com.abdelrahman_elshreif.sky_vibe.utils
-
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
-import androidx.core.os.ConfigurationCompat
 import java.util.Locale
 
 object LanguageUtil {
     @SuppressLint("ObsoleteSdkInt")
-    fun setLocale(context: Context?, languageCode: String): Context {
+    fun setLocale(context: Context, languageCode: String): Context {
         val locale = Locale(languageCode)
-        val config = Configuration(context?.resources?.configuration)
+        Locale.setDefault(locale)
 
+        val resources = context.resources
+        val config = Configuration(resources.configuration)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             config.setLocale(locale)
             config.setLayoutDirection(locale)
-            return context!!.createConfigurationContext(config)
         } else {
-            Locale.setDefault(locale)
             config.locale = locale
-            config.setLayoutDirection(locale)
-            context?.resources?.updateConfiguration(config, context.resources.displayMetrics)
         }
-        return context!!
-    }
 
-    fun getCurrentLanguage(context: Context): String {
-        return ConfigurationCompat
-            .getLocales(context.resources.configuration)
-            .get(0)
-            ?.language
-            ?: "en"
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.createConfigurationContext(config)
+        } else {
+            context
+        }
     }
 }
