@@ -34,7 +34,7 @@
     <string name="mile_hour">mi/hr</string>
     <string name="meter_sec">m/s</string>
     <string name="english">English</string>
-    <string name="arabic">Arabic</string>
+    <string name="arabic">العربية</string>
     <string name="temp_unit">Temp Unit</string>
     <string name="location">Location</string>
     <string name="wind_speed_unit">Wind Speed Unit</string>
