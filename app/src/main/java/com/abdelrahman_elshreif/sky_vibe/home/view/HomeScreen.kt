@@ -2,13 +2,9 @@ package com.abdelrahman_elshreif.sky_vibe.home.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -27,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -57,6 +52,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
@@ -65,10 +61,9 @@ import com.abdelrahman_elshreif.sky_vibe.data.model.DailyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.HourlyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
+import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.Utility
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import kotlin.math.roundToInt
-import kotlin.time.Duration
 
 fun Context.hasPermission(permission: String): Boolean {
     return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
@@ -76,9 +71,13 @@ fun Context.hasPermission(permission: String): Boolean {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
+fun HomeScreen(homeViewModel: HomeViewModel) {
     val weatherData = homeViewModel.homeWeatherData.collectAsState(null)
     val isLoading = homeViewModel.isLoading.collectAsState(true)
+
+    val tempUnit = homeViewModel.tempUnit.collectAsState()
+    val windUint = homeViewModel.windUnit.collectAsState()
+    val locationMethod = homeViewModel.locationMethod.collectAsState()
 
     val context = LocalContext.current
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
@@ -86,6 +85,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) {}
+
+
 
 
     LaunchedEffect(Unit) {
@@ -114,7 +115,11 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
     ) {
         when {
             isLoading.value -> LoadingWeatherState()
-            weatherData.value != null -> HomeContent(weatherData.value!!)
+            weatherData.value != null -> HomeContent(
+                weatherData.value!!,
+                tempUnit.value,
+                windUint.value
+            )
         }
 
     }
@@ -124,6 +129,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, modifier: Modifier) {
 @Composable
 fun HomeContent(
     weatherData: WeatherResponse,
+    tempUnit: String,
+    windUnit: String,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -132,12 +139,12 @@ fun HomeContent(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            WeatherHeader(weatherData)
+            WeatherHeader(weatherData, tempUnit)
             Spacer(modifier = Modifier.height(16.dp))
-            WeatherDetailsCard(weatherData)
+            WeatherDetailsCard(weatherData, windUnit)
             Spacer(modifier = Modifier.height(16.dp))
-            TodayHourlyForecast(hourlyForecastData = weatherData.hourly)
-            NextDaysForecast(dailyForecastData = weatherData.daily)
+            TodayHourlyForecast(hourlyForecastData = weatherData.hourly, tempUnit)
+            NextDaysForecast(dailyForecastData = weatherData.daily, tempUnit)
         }
     }
 }
@@ -145,7 +152,7 @@ fun HomeContent(
 @SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun WeatherHeader(weatherData: WeatherResponse) {
+fun WeatherHeader(weatherData: WeatherResponse, tempUnit: String) {
     val date = Utility.DateTimeUtil.convertUnixToDate(weatherData.current.dt)
     val currentTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.dt)
     val sunriseTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.sunrise)
@@ -161,7 +168,22 @@ fun WeatherHeader(weatherData: WeatherResponse) {
         )
         AnimatedContent(targetState = weatherData.current.temp) { temp ->
             Text(
-                text = stringResource(R.string.c, String.format("%.1f ", temp)),
+                text = when (tempUnit) {
+                    SettingOption.CELSIUS.storedValue -> stringResource(
+                        R.string.c,
+                        temp.roundToInt()
+                    )
+
+                    SettingOption.KELVIN.storedValue -> stringResource(
+                        R.string.k,
+                        temp.roundToInt()
+                    )
+
+                    else -> stringResource(
+                        R.string.f,
+                        temp.roundToInt()
+                    )
+                },
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -205,8 +227,9 @@ fun WeatherIcon(iconCode: String) {
 
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
-fun WeatherDetailsCard(weatherData: WeatherResponse) {
+fun WeatherDetailsCard(weatherData: WeatherResponse, windUnit: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -227,7 +250,22 @@ fun WeatherDetailsCard(weatherData: WeatherResponse) {
                 WeatherDetailItem(
                     icon = Icons.Default.Air,
                     label = stringResource(R.string.wind),
-                    value = stringResource(R.string.m_s, weatherData.current.windSpeed)
+                    value = when (windUnit) {
+                        SettingOption.METER_SEC.storedValue -> stringResource(
+                            R.string.m_s,
+                            String.format("%.1f ", weatherData.current.windSpeed)
+                        )
+
+                        SettingOption.MILE_HOUR.storedValue -> stringResource(
+                            R.string.mi_hr,
+                            String.format("%.1f ", weatherData.current.windSpeed)
+                        )
+
+                        else -> stringResource(
+                            R.string.f,
+                            String.format("%.1f ", weatherData.current.windSpeed)
+                        )
+                    }
                 )
                 WeatherDetailItem(
                     icon = Icons.Default.WbCloudy,
@@ -280,6 +318,7 @@ fun WeatherDetailItem(
     value: String
 ) {
     Column(
+        Modifier.padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -290,6 +329,7 @@ fun WeatherDetailItem(
         )
         Text(
             text = value,
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp)
         )
@@ -304,7 +344,7 @@ fun WeatherDetailItem(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>) {
+fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>, tempUnit: String) {
     val todayDate = hourlyForecastData.firstOrNull()?.let {
         Utility.DateTimeUtil.convertUnixToDate(it.dt)
     }
@@ -343,7 +383,7 @@ fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>) {
                         .background(color = Color.Transparent)
                 ) {
                     items(hourlyList) { hourlyForecastItem ->
-                        HourlyForecastItemUI(hourlyForecastItem)
+                        HourlyForecastItemUI(hourlyForecastItem, tempUnit)
                     }
                 }
             }
@@ -351,9 +391,10 @@ fun TodayHourlyForecast(hourlyForecastData: List<HourlyWeather>) {
     }
 }
 
+@SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HourlyForecastItemUI(item: HourlyWeather) {
+fun HourlyForecastItemUI(item: HourlyWeather, tempUnit: String) {
     Card(
         modifier = Modifier
             .width(70.dp)
@@ -378,7 +419,21 @@ fun HourlyForecastItemUI(item: HourlyWeather) {
             )
 
             Text(
-                text = stringResource(R.string.c_forecasting, item.temp.roundToInt()),
+                text = when (tempUnit) {
+                    SettingOption.CELSIUS.storedValue -> stringResource(
+                        R.string.c,
+                        item.temp.roundToInt()
+                    )
+
+                    SettingOption.KELVIN.storedValue -> stringResource(
+                        R.string.k,
+                        item.temp.roundToInt()
+                    )
+
+                    else -> stringResource(
+                        R.string.f, item.temp.roundToInt()
+                    )
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -388,7 +443,7 @@ fun HourlyForecastItemUI(item: HourlyWeather) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NextDaysForecast(dailyForecastData: List<DailyWeather>) {
+fun NextDaysForecast(dailyForecastData: List<DailyWeather>, tempUnit: String) {
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -409,16 +464,17 @@ fun NextDaysForecast(dailyForecastData: List<DailyWeather>) {
         ) {
 
             dailyForecastData.take(8).forEach { dailyWeather ->
-                DailyForecastItemUI(dailyWeather)
+                DailyForecastItemUI(dailyWeather, tempUnit)
             }
         }
     }
 
 }
 
+@SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
+fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather, tempUnit: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -464,10 +520,22 @@ fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
 
                     ) {
                     Text(
-                        text = stringResource(
-                            R.string.c_forecasting,
-                            dailyForecastDataItem.temp.day.roundToInt()
-                        ),
+                        text = when (tempUnit) {
+                            SettingOption.CELSIUS.storedValue -> stringResource(
+                                R.string.c,
+                                dailyForecastDataItem.temp.day.roundToInt()
+                            )
+
+                            SettingOption.KELVIN.storedValue -> stringResource(
+                                R.string.k,
+                                dailyForecastDataItem.temp.day.roundToInt()
+                            )
+
+                            else -> stringResource(
+                                R.string.f,
+                                dailyForecastDataItem.temp.day.roundToInt()
+                            )
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -475,13 +543,29 @@ fun DailyForecastItemUI(dailyForecastDataItem: DailyWeather) {
                     WeatherIcon(dailyForecastDataItem.weather[0].icon)
 
                     Text(
-                        text = stringResource(
-                            R.string.degree_at_day_forecast,
-                            dailyForecastDataItem.temp.min.roundToInt(),
-                            dailyForecastDataItem.temp.max.roundToInt()
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                        text = when (tempUnit) {
+                            SettingOption.CELSIUS.storedValue -> stringResource(
+                                R.string.degree_at_day_forecast,
+                                dailyForecastDataItem.temp.min.roundToInt(),
+                                dailyForecastDataItem.temp.max.roundToInt()
+                            )
+
+                            SettingOption.KELVIN.storedValue -> stringResource(
+                                R.string.k,
+                                dailyForecastDataItem.temp.min.roundToInt()
+                            ) + " / " + stringResource(
+                                R.string.k,
+                                dailyForecastDataItem.temp.max.roundToInt()
+                            )
+
+                            else -> stringResource(
+                                R.string.f,
+                                dailyForecastDataItem.temp.min.roundToInt()
+                            ) + " / " + stringResource(
+                                R.string.f,
+                                dailyForecastDataItem.temp.max.roundToInt()
+                            )
+                        }
                     )
                 }
             }

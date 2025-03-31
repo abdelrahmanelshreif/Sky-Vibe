@@ -23,7 +23,6 @@ class SettingViewModel(private val settingDataStore: SettingDataStore) : ViewMod
     private val _tempUnit = MutableStateFlow(R.string.celsius_c)
     val tempUnit = _tempUnit.asStateFlow()
 
-
     private val _windUnit = MutableStateFlow(R.string.meter_sec)
     val windUnit = _windUnit.asStateFlow()
 

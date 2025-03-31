@@ -72,7 +72,7 @@ fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel)
                 modifier = Modifier.padding(paddingValues)
             ) {
                 composable(Screen.Home.route) {
-                    HomeScreen(homeViewModel, modifier = Modifier)
+                    HomeScreen(homeViewModel)
                 }
                 composable(Screen.Favourite.route) {
                     FavouriteScreen()

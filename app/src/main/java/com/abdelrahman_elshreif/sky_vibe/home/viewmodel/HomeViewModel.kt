@@ -32,15 +32,56 @@ class HomeViewModel(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
 
+    private val _tempUnit = MutableStateFlow("")
+    val tempUnit = _tempUnit.asStateFlow()
+
+    private val _windUnit = MutableStateFlow("")
+    val windUnit = _windUnit.asStateFlow()
+
+    private val _locationMethod = MutableStateFlow("")
+    val locationMethod = _locationMethod.asStateFlow()
+
+
 
     init {
+        fetchSetting()
         fetchLocation()
+    }
+
+    private fun fetchSetting() {
+        viewModelScope.launch {
+            launch {
+                settingDataStore.tempUnit
+                    .distinctUntilChanged()
+                    .catch { e -> Log.e("HomeViewModel", "Error collecting tempUnit", e) }
+                    .collect { tempUnit ->
+                        _tempUnit.value = tempUnit
+                    }
+            }
+
+            launch {
+                settingDataStore.windSpeedUnit
+                    .distinctUntilChanged()
+                    .catch { e -> Log.e("HomeViewModel", "Error collecting windSpeedUnit", e) }
+                    .collect { windUnit ->
+                        _windUnit.value = windUnit
+                    }
+            }
+
+            launch {
+                settingDataStore.locationMethod
+                    .distinctUntilChanged()
+                    .catch { e -> Log.e("HomeViewModel", "Error collecting locationMethod", e) }
+                    .collect { locMethod ->
+                        _locationMethod.value = locMethod
+                    }
+            }
+        }
     }
 
     private fun fetchWeatherData(lat: Double, lon: Double) {
         viewModelScope.launch {
             _isLoading.value = true
-
 
             val tempUnit =
                 settingDataStore.tempUnit.firstOrNull() ?: SettingOption.CELSIUS.storedValue
@@ -49,11 +90,6 @@ class HomeViewModel(
             val language = settingDataStore.language.firstOrNull()?.let {
                 if (it == "english") "en" else "ar"
             } ?: "en"
-
-            Log.i(
-                "TAG",
-                "fetchWeatherData: TempUnit=$tempUnit, WindSpeedUnit=$windSpeedUnit, Language=$language"
-            )
 
             repository.getWeatherByCoordinates(lat, lon, lang = language)
                 .catch { ex ->
@@ -89,18 +125,12 @@ class HomeViewModel(
                 .collect { weatherData ->
                     _homeWeatherData.value = weatherData
                 }
-
             _isLoading.value = false
         }
     }
 
 
     private fun fetchLocation() {
-        viewModelScope.launch {
-            settingDataStore.tempUnit.collect().let {
-                Log.i("TAG", "fetchWeatherData: $it")
-            }
-        }
         viewModelScope.launch {
             val loc = locationUtilities.getOrFetchLocation()
             loc?.let {
@@ -111,11 +141,6 @@ class HomeViewModel(
     }
 
     fun fetchLocationAndWeather() {
-        viewModelScope.launch {
-            settingDataStore.tempUnit.collect().let {
-                Log.i("TAG", "fetchWeatherData: $it")
-            }
-        }
         fetchLocation()
         fetchWeatherData(_location.value?.first ?: 0.0, _location.value?.second ?: 0.0)
     }

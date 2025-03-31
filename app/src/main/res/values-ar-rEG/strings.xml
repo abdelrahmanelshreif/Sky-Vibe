@@ -17,11 +17,9 @@
     <string name="clouds">السحب</string>
     <string name="hpa">%1$s هيكتوباسكال</string>
     <string name="m_s">%1$s  متر/ث</string>
-    <string name="c">%1$sس°</string>
     <string name="c_forecasting">%1$s°C</string>
     <string name="today_hourly_details">تفاصيل اليوم</string>
     <string name="next_7_days_forecast">الطقس لل7 أيام القادمة</string>
-    <string name="degree_at_day_forecast">%1$sس° / %2$s°س</string>
     <string name="min_max">العظمى/الصغرى</string>
     <string name="home">الرئيسية</string>
     <string name="favourite">المفضلة</string>
@@ -40,4 +38,9 @@
     <string name="location">الموقع</string>
     <string name="wind_speed_unit">وحدة سرعة الرياح</string>
     <string name="language">لغة</string>
+    <string name="degree_at_day_forecast">%1$d°س / %2$d°س</string>
+    <string name="c">%d°س</string>
+    <string name="k">%d°ك</string>
+    <string name="f">%d°ف</string>
+    <string name="mi_hr">%1$s ميل/ساعة</string>
 </resources>

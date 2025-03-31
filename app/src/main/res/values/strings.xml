@@ -39,4 +39,7 @@
     <string name="location">Location</string>
     <string name="wind_speed_unit">Wind Speed Unit</string>
     <string name="language">Language</string>
+    <string name="k">%1$s°K</string>
+    <string name="f">%1$s°F</string>
+    <string name="mi_hr">%1$s mi/hr</string>
 </resources>
