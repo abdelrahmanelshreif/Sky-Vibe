@@ -14,7 +14,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.abdelrahman_elshreif.sky_vibe.data.model.LocationHolder
+import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -147,7 +147,7 @@ class LocationUtilities(private val context: Context) {
         lon: Double,
         address:String? = null
     ){
-        val locationHolder = LocationHolder(
+        val locationHolder = SkyVibeLocation(
             latitude = lat,
             longitude = lon,
             address = address

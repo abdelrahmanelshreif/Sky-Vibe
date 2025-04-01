@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.abdelrahman_elshreif.sky_vibe.data.model.LocationHolder
+import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 
 
-@Database(entities = [LocationHolder::class], version = 1, exportSchema = false)
+@Database(entities = [SkyVibeLocation::class], version = 1, exportSchema = false)
 abstract class SkyVibeDatabase : RoomDatabase() {
 
-    abstract fun getLocationHolderDao(): LocationHolderDao
+    abstract fun getFavouriteLocationDao(): FavouriteLocationDao
 
     companion object {
         @Volatile

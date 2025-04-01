@@ -1,6 +1,8 @@
 package com.abdelrahman_elshreif.sky_vibe
 
+import android.app.Application
 import android.os.Build
+import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -18,16 +20,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abdelrahman_elshreif.sky_vibe.alarm.view.AlarmScreen
 import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
+import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.view.HomeScreen
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
 import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.view.SettingScreen
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
+import org.osmdroid.config.Configuration
+
+class SkyVibeApp :Application(){
+    override fun onCreate() {
+        super.onCreate()
+        Configuration.getInstance().load(applicationContext, PreferenceManager.getDefaultSharedPreferences(applicationContext))
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel) {
+fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel,favouriteViewModel: FavouriteViewModel) {
     val navController = rememberNavController()
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
@@ -75,7 +86,7 @@ fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel)
                     HomeScreen(homeViewModel)
                 }
                 composable(Screen.Favourite.route) {
-                    FavouriteScreen()
+                    FavouriteScreen(favouriteViewModel , navController)
                 }
                 composable(Screen.Alarm.route) {
                     AlarmScreen()

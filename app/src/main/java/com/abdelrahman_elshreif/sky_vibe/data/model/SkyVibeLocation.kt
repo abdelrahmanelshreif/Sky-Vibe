@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "locations")
-data class LocationHolder(
+data class SkyVibeLocation(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val latitude: Double,
