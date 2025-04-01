@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            SkyVibeApp(homeViewModel, settingViewModel, favouriteViewModel)
+            SkyVibeApp(homeViewModel, settingViewModel, favouriteViewModel, locationUtilities = locationUtilities)
         }
     }
 

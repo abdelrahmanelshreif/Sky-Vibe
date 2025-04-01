@@ -96,7 +96,7 @@ class LocationUtilities(private val context: Context) {
         )
     }
 
-    private fun getAddressFromLocation(lat: Double, lon: Double): String {
+    fun getAddressFromLocation(lat: Double, lon: Double): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(lat, lon, 1)
@@ -145,15 +145,15 @@ class LocationUtilities(private val context: Context) {
     suspend fun saveLocationFromMapToDataStore(
         lat: Double,
         lon: Double,
-        address:String? = null
-    ){
+        address: String? = null
+    ) {
         val locationHolder = SkyVibeLocation(
             latitude = lat,
             longitude = lon,
             address = address
         )
 
-        context.dataStore.edit {preferences->
+        context.dataStore.edit { preferences ->
             preferences[LATITUDE] = locationHolder.latitude
             preferences[LONGITUDE] = locationHolder.longitude
             locationHolder.address?.let {

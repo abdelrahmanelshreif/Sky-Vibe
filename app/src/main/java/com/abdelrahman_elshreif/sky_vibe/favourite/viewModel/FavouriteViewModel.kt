@@ -54,20 +54,20 @@ class FavouriteViewModel(private val repository: SkyVibeRepository) : ViewModel(
     }
 
     fun addFavouritePlace(location: SkyVibeLocation) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.addLocationToFavourite(location)
         }
 
     }
 
     fun removeFavouritePlace(location: SkyVibeLocation) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.deleteLocationFromFavourite(location)
         }
     }
 
     fun getFavouriteLocation() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getAllSavedLocations()
         }
     }
