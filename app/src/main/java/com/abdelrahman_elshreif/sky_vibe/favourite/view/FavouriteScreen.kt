@@ -15,4 +15,5 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 
 @Composable
 fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavController) {
+    MapScreen(favViewModel)
 }
