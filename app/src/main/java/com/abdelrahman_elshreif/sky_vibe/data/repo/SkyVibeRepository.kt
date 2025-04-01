@@ -70,7 +70,9 @@ class SkyVibeRepository private constructor(
         return localDataSource.deleteLocationFromFavourite(location)
     }
 
-    suspend fun searchLocations(query:String): List<NominatimLocation> {
-        return remoteDataSource.getSuggestedLocations(query)
-    }
+    fun searchLocations(query: String) =
+        flow {
+            val response = remoteDataSource.getSuggestedLocations(query)
+            emit(response)
+        }
 }

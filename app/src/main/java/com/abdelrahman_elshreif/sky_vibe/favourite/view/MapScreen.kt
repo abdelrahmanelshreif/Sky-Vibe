@@ -27,7 +27,6 @@ fun MapScreen(viewModel: FavouriteViewModel) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Map View as the background
         AndroidView(
             factory = { context ->
                 MapView(context).apply {
@@ -58,7 +57,6 @@ fun MapScreen(viewModel: FavouriteViewModel) {
                 viewModel,
                 onSuggestionClick = {
                     Log.i("TAG", "MapScreen: $it was clicked")
-                    // Handle suggestion click, e.g., update map center
                 }
             )
         }
