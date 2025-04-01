@@ -13,13 +13,13 @@ interface FavouriteLocationDao {
 
 
     @Query("SELECT * FROM locations")
-    suspend fun getAllLocations(): Flow<List<SkyVibeLocation>>
+     fun getAllLocations(): Flow<List<SkyVibeLocation>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertLocation(location: SkyVibeLocation): Long
+     fun insertLocation(location: SkyVibeLocation): Long
 
     @Delete
-    suspend fun deleteLocation(location: SkyVibeLocation): Long
+     fun deleteLocation(location: SkyVibeLocation)
 
 
 }

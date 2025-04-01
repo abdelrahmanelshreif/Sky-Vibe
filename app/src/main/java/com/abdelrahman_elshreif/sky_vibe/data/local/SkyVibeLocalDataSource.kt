@@ -13,7 +13,7 @@ class SkyVibeLocalDataSource(private val favouriteLocationDao: FavouriteLocation
         return favouriteLocationDao.insertLocation(location)
     }
 
-    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation): Long {
+    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
         return favouriteLocationDao.deleteLocation(location)
     }
 

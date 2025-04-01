@@ -65,7 +65,7 @@ class SkyVibeRepository private constructor(
         return localDataSource.addLocationToFavourite(location)
     }
 
-    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation): Long {
+    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
         return localDataSource.deleteLocationFromFavourite(location)
     }
 }
