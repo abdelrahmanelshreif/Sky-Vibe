@@ -8,6 +8,7 @@ import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMApiServices
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.favourite.model.FavouriteScreenState
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenNavigationEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
@@ -37,6 +38,9 @@ class FavouriteViewModel(
     private val _uiState = MutableStateFlow(MapScreenState())
     val uiState = _uiState.asStateFlow()
 
+    private val _favUiState = MutableStateFlow(FavouriteScreenState())
+    val favUiState = _favUiState.asStateFlow()
+
     private val _searchBarUiState = MutableStateFlow(SearchBarState())
     val searchBarUiState = _searchBarUiState.asStateFlow()
 
@@ -55,6 +59,31 @@ class FavouriteViewModel(
                     performSearch(query)
                 }
         }
+        loadSavedLocations()
+    }
+
+    private fun loadSavedLocations() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                repository.getAllSavedLocations()
+                    .collect { locations ->
+                        _favUiState.update {
+                            it.copy(
+                                favouriteLocations = locations,
+                                isLoading = false
+                            )
+                        }
+                    }
+            } catch (e: Exception) {
+                _favUiState.update {
+                    it.copy(
+                        error = e.message,
+                        isLoading = false
+                    )
+                }
+            }
+        }
     }
 
     fun handleMapEvent(event: MapScreenEvent) {
@@ -69,7 +98,6 @@ class FavouriteViewModel(
 
             MapScreenEvent.OnSaveLocation -> {
                 saveLocation()
-                handleNavigateBack()
             }
 
             is MapScreenEvent.OnLocateMeButtonPressed -> {
@@ -86,6 +114,7 @@ class FavouriteViewModel(
             _navigationEvent.emit(MapScreenNavigationEvent.NavigateBack)
         }
     }
+
 
     private fun handleLocateMe() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -157,20 +186,28 @@ class FavouriteViewModel(
         }
     }
 
-
     private fun saveLocation() {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.value.selectedLocation?.let { location ->
-                val skyVibeLocation = SkyVibeLocation(
-                    latitude = location.lat,
-                    longitude = location.lon,
-                    address = location.displayName
-                )
-                repository.addLocationToFavourite(skyVibeLocation)
+            try {
+                _uiState.value.selectedLocation?.let { location ->
+                    val skyVibeLocation = SkyVibeLocation(
+                        latitude = location.lat,
+                        longitude = location.lon,
+                        address = location.displayName
+                    )
+                    repository.addLocationToFavourite(skyVibeLocation)
+
+                    _uiState.update {
+                        it.copy(selectedLocation = null)
+                    }
+                    _searchBarUiState.update {
+                        it.copy(query = "", suggestedLocations = emptyList())
+                    }
+                    handleNavigateBack()
+                }
+            } catch (e: Exception) {
+                println("Error saving location: ${e.message}")
             }
-        }
-        _uiState.update {
-            it.copy(selectedLocation = null, searchQuery = "")
         }
     }
 

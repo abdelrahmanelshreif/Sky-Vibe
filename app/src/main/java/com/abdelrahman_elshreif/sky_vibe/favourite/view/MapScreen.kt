@@ -125,7 +125,6 @@ fun MapScreen(
                 Button(
                     onClick = {
                         viewModel.handleMapEvent(MapScreenEvent.OnSaveLocation)
-//                        viewModel.handleMapEvent(MapScreenEvent.OnBackBtnPressed)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
