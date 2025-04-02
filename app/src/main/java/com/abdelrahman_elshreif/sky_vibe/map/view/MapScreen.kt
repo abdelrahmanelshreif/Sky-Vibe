@@ -1,4 +1,4 @@
-package com.abdelrahman_elshreif.sky_vibe.favourite.view
+package com.abdelrahman_elshreif.sky_vibe.map.view
 
 import android.annotation.SuppressLint
 import android.view.MotionEvent
@@ -39,13 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenNavigationEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarState
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenNavigationEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenState
+import com.abdelrahman_elshreif.sky_vibe.map.model.SearchBarEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.SearchBarState
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
-import kotlinx.coroutines.flow.collect
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -138,7 +137,7 @@ fun MapScreen(
         LocationButton(
             onClick = { viewModel.handleMapEvent(MapScreenEvent.OnLocateMeButtonPressed) },
             modifier = Modifier
-                .align(alignment = Alignment.BottomEnd)
+                .align(alignment = BottomEnd)
                 .padding(16.dp)
         )
     }

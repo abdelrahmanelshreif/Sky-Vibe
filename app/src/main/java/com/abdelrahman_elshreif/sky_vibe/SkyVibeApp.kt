@@ -1,7 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe
 
 import android.app.Application
-import android.app.LocaleConfig
 import android.os.Build
 import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
@@ -21,7 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abdelrahman_elshreif.sky_vibe.alarm.view.AlarmScreen
 import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
-import com.abdelrahman_elshreif.sky_vibe.favourite.view.MapScreen
+import com.abdelrahman_elshreif.sky_vibe.map.view.MapScreen
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.view.HomeScreen
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel

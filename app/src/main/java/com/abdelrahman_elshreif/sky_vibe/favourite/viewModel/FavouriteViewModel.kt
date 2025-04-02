@@ -2,18 +2,15 @@ package com.abdelrahman_elshreif.sky_vibe.favourite.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.util.query
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
-import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMApiServices
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.FavouriteScreenState
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenNavigationEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarEvent
-import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarState
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenNavigationEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenState
+import com.abdelrahman_elshreif.sky_vibe.map.model.SearchBarEvent
+import com.abdelrahman_elshreif.sky_vibe.map.model.SearchBarState
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
