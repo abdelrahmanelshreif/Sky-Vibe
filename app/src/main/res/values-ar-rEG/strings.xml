@@ -43,4 +43,9 @@
     <string name="k">%d°ك</string>
     <string name="f">%d°ف</string>
     <string name="mi_hr">%1$s ميل/ساعة</string>
+    <string name="n_a">غير متاح</string>
+    <string name="delete_location">ازالة الموقع</string>
+    <string name="cancel">الغاء</string>
+    <string name="are_you_sure_you_want_to_delete_this_location">هل أنت متأكد من انك تريد حذف هذا الموقع\n\n%1$s</string>
+    <string name="delete">ازلة</string>
 </resources>

@@ -29,6 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,7 +46,20 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavController) {
 
     val uiState by favViewModel.favUiState.collectAsState()
+    var locationToDelete by remember { mutableStateOf<SkyVibeLocation?>(null) }
 
+    locationToDelete?.let { location ->
+        DeleteConfirmationDialog(
+            locationAddress = location.address!!,
+            onConfirm = {
+                favViewModel.removeFavouritePlace(location)
+                locationToDelete = null
+            },
+            onDismiss = {
+                locationToDelete = null
+            }
+        )
+    }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -87,7 +103,7 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
                         FavouriteLocationItem(
                             location,
                             {
-                                favViewModel.removeFavouritePlace(location)
+                                locationToDelete = location
                             }, Modifier
                         )
                     }

@@ -18,9 +18,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -32,6 +38,9 @@ fun FavouriteLocationItem(
     onDeleteClick: () -> Unit,
     modifier: Modifier
 ) {
+
+
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -75,12 +84,12 @@ fun FavouriteLocationItem(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Location",
+                    text = stringResource(R.string.location),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = location.address ?: "N/A",
+                    text = location.address ?: stringResource(R.string.n_a),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -95,7 +104,7 @@ fun FavouriteLocationItem(
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete location",
+                        contentDescription = stringResource(R.string.delete_location),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
