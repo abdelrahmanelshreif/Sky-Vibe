@@ -107,7 +107,7 @@ fun SkyVibeApp(
                 }
 
                 composable("add_location") {
-                    MapScreen(viewModel = favouriteViewModel, locationUtilities, navController)
+                    MapScreen(viewModel = favouriteViewModel, navController)
                 }
             }
         }

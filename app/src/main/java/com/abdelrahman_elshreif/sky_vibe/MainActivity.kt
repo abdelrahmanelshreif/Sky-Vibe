@@ -19,7 +19,6 @@ import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModelFact
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import androidx.lifecycle.lifecycleScope
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeDatabase
-import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMApiServices
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMHelper
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModelFactory
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
         locationUtilities = LocationUtilities(this)
         val homeFactory = HomeViewModelFactory(
             SkyVibeRepository.getInstance(
-                ForecastingRemoteDataSource(RetrofitHelper.apiservice,OSMHelper.apiService),
+                ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
             ),
             locationUtilities,
@@ -45,9 +44,10 @@ class MainActivity : ComponentActivity() {
         )
         val favouriteFactory = FavouriteViewModelFactory(
             SkyVibeRepository.getInstance(
-                ForecastingRemoteDataSource(RetrofitHelper.apiservice,OSMHelper.apiService),
+                ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
-            )
+            ),
+            locationUtilities
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }
@@ -61,7 +61,12 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            SkyVibeApp(homeViewModel, settingViewModel, favouriteViewModel, locationUtilities = locationUtilities)
+            SkyVibeApp(
+                homeViewModel,
+                settingViewModel,
+                favouriteViewModel,
+                locationUtilities = locationUtilities
+            )
         }
     }
 
