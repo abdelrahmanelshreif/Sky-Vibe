@@ -9,13 +9,16 @@ import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMApiServices
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
+import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenNavigationEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarState
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
@@ -36,6 +39,10 @@ class FavouriteViewModel(
 
     private val _searchBarUiState = MutableStateFlow(SearchBarState())
     val searchBarUiState = _searchBarUiState.asStateFlow()
+
+    private val _navigationEvent = MutableSharedFlow<MapScreenNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
 
     private val _searchQuery = MutableStateFlow("")
 
@@ -62,20 +69,37 @@ class FavouriteViewModel(
 
             MapScreenEvent.OnSaveLocation -> {
                 saveLocation()
+                handleNavigateBack()
             }
 
-            is MapScreenEvent.OnLocateMeButtonPressed->{
+            is MapScreenEvent.OnLocateMeButtonPressed -> {
                 handleLocateMe()
             }
+
+            MapScreenEvent.OnBackBtnPressed ->
+                handleNavigateBack()
+        }
+    }
+
+    private fun handleNavigateBack() {
+        viewModelScope.launch {
+            _navigationEvent.emit(MapScreenNavigationEvent.NavigateBack)
         }
     }
 
     private fun handleLocateMe() {
-        viewModelScope.launch (Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO) {
             val loc = locationUtilities.getFreshLocation()
-            val locAddress = loc?.let { locationUtilities.getAddressFromLocation(it.latitude,loc.longitude) }
+            val locAddress =
+                loc?.let { locationUtilities.getAddressFromLocation(it.latitude, loc.longitude) }
             _uiState.update {
-                it.copy(selectedLocation = locAddress?.let { it1 -> NominatimLocation(it1,loc.latitude,loc.longitude) })
+                it.copy(selectedLocation = locAddress?.let { it1 ->
+                    NominatimLocation(
+                        it1,
+                        loc.latitude,
+                        loc.longitude
+                    )
+                })
             }
         }
     }

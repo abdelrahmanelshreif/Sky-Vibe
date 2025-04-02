@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,10 +40,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
+import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenNavigationEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarState
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
+import kotlinx.coroutines.flow.collect
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -55,6 +58,15 @@ fun MapScreen(
     viewModel: FavouriteViewModel,
     navController: NavController,
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is MapScreenNavigationEvent.NavigateBack -> {
+                    navController.popBackStack()
+                }
+            }
+        }
+    }
 
     val mapState by viewModel.uiState.collectAsState()
     val searchBarState by viewModel.searchBarUiState.collectAsState()
@@ -68,7 +80,7 @@ fun MapScreen(
         )
 
         IconButton(
-            onClick = { navController.popBackStack() },
+            onClick = { viewModel.handleMapEvent(MapScreenEvent.OnBackBtnPressed) },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
@@ -113,13 +125,12 @@ fun MapScreen(
                 Button(
                     onClick = {
                         viewModel.handleMapEvent(MapScreenEvent.OnSaveLocation)
-                        navController.popBackStack()
+                        viewModel.handleMapEvent(MapScreenEvent.OnBackBtnPressed)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Save Location")
                 }
-
 
             }
 
