@@ -20,9 +20,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbCloudy
@@ -31,12 +36,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -50,22 +59,71 @@ import com.abdelrahman_elshreif.sky_vibe.data.model.DailyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.HourlyWeather
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
+import com.abdelrahman_elshreif.sky_vibe.home.view.HomeContent
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
+import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.Utility
 import kotlin.math.roundToInt
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FavouriteWeatherDetails(
     lat: Double,
     lon: Double,
     favouriteWeatherDetailsViewModel: FavouriteWeatherDetailsViewModel,
     navController: NavController
-){
+) {
 
-//    val tempUnit = favouriteWeatherDetailsViewModel.tempUnit.collectAsState()
-//    val windUint = favouriteWeatherDetailsViewModel.windUnit.collectAsState()
+    val tempUnit = favouriteWeatherDetailsViewModel.tempUnit.collectAsState()
+    val windUint = favouriteWeatherDetailsViewModel.windUnit.collectAsState()
+    val weather = favouriteWeatherDetailsViewModel.favouriteWeatherData.collectAsState()
+    val isLoading = favouriteWeatherDetailsViewModel.isLoading.collectAsState()
 
+    LaunchedEffect(Unit) {
+        favouriteWeatherDetailsViewModel.fetchWeatherData(lat, lon)
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 56.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when {
+                isLoading.value -> LoadingWeatherState()
+                weather.value != null -> FavouriteLocationContent(
+                    weather.value!!,
+                    tempUnit.value,
+                    windUint.value
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.TopStart)
+        ) {
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
             ),
-            locationUtilities
+            locationUtilities, SettingDataStore(this)
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }
