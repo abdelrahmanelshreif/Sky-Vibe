@@ -20,6 +20,8 @@ import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import androidx.lifecycle.lifecycleScope
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeDatabase
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMHelper
+import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
+import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
@@ -49,10 +51,19 @@ class MainActivity : ComponentActivity() {
             ),
             locationUtilities
         )
+
+        val favWeatherDetailFactory = FavouriteWeatherDetailsViewModelFactory(
+            SkyVibeRepository.getInstance(
+                ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
+                SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
+            ),
+            locationUtilities
+        )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }
         val homeViewModel: HomeViewModel by viewModels { homeFactory }
         val favouriteViewModel: FavouriteViewModel by viewModels { favouriteFactory }
+        val favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel by viewModels { favWeatherDetailFactory }
         // End initializing ViewModels
         lifecycleScope.launch {
             settingViewModel.languageChangeEvent.collect { languageCode ->
@@ -65,6 +76,7 @@ class MainActivity : ComponentActivity() {
                 homeViewModel,
                 settingViewModel,
                 favouriteViewModel,
+                favWeatherDetailViewModel,
                 locationUtilities = locationUtilities
             )
         }

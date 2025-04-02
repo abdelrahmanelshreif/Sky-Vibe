@@ -47,4 +47,7 @@
     <string name="cancel">Cancel</string>
     <string name="are_you_sure_you_want_to_delete_this_location">Are you sure you want to delete this location?\n\n%1$s</string>
     <string name="delete">Delete</string>
+    <string name="save_location">Save Location</string>
+    <string name="my_location">My Location</string>
+    <string name="search_for_location">Search for location...</string>
 </resources>

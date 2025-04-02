@@ -2,27 +2,16 @@ package com.abdelrahman_elshreif.sky_vibe.favourite.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,13 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
-import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
+import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
 
 @Composable
 fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavController) {
@@ -49,31 +36,22 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
     var locationToDelete by remember { mutableStateOf<SkyVibeLocation?>(null) }
 
     locationToDelete?.let { location ->
-        DeleteConfirmationDialog(
-            locationAddress = location.address!!,
-            onConfirm = {
-                favViewModel.removeFavouritePlace(location)
-                locationToDelete = null
-            },
-            onDismiss = {
-                locationToDelete = null
-            }
-        )
+        DeleteConfirmationDialog(locationAddress = location.address!!, onConfirm = {
+            favViewModel.removeFavouritePlace(location)
+            locationToDelete = null
+        }, onDismiss = {
+            locationToDelete = null
+        })
     }
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("add_location") }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Location")
-            }
+    Scaffold(floatingActionButton = {
+        FloatingActionButton(onClick = { navController.navigate("add_location") }) {
+            Icon(Icons.Default.Add, contentDescription = "Add Location")
         }
-    ) { padding ->
+    }) { padding ->
         when {
             uiState.isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -81,8 +59,7 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
 
             uiState.error != null -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = uiState.error ?: "Unknown error occurred",
@@ -101,10 +78,19 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
                 ) {
                     items(uiState.favouriteLocations) { location ->
                         FavouriteLocationItem(
-                            location,
-                            {
+                            location = location,
+                            onDeleteClick = {
                                 locationToDelete = location
-                            }, Modifier
+                            },
+                            onLocationClick = {
+                                navController.navigate(
+                                    Screen.FavouriteWeatherDetails.createRoute(
+                                        latitude = location.latitude,
+                                        longitude = location.longitude
+                                    )
+                                )
+                            },
+                            Modifier
                         )
                     }
                 }

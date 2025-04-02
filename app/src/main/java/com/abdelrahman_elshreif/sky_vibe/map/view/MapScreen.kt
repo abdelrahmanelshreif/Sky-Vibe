@@ -35,9 +35,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenEvent
 import com.abdelrahman_elshreif.sky_vibe.map.model.MapScreenNavigationEvent
@@ -127,7 +129,7 @@ fun MapScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Save Location")
+                    Text(stringResource(R.string.save_location))
                 }
 
             }
@@ -152,7 +154,7 @@ fun LocationButton(onClick: () -> Unit, modifier: Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.MyLocation,
-            contentDescription = "My Location",
+            contentDescription = stringResource(R.string.my_location),
             tint = MaterialTheme.colorScheme.onPrimary
         )
     }
@@ -226,7 +228,7 @@ private fun SearchBar(
                 onEvent(SearchBarEvent.OnQueryChanged(query))
             },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search for location...") },
+            placeholder = { Text(stringResource(R.string.search_for_location)) },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             trailingIcon = {
