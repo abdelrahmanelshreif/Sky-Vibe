@@ -35,16 +35,18 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.SearchBarState
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MapScreen(
     viewModel: FavouriteViewModel,
     navController: NavController,
-    ) {
+) {
 
     val mapState by viewModel.uiState.collectAsState()
     val searchBarState by viewModel.searchBarUiState.collectAsState()
@@ -107,8 +109,17 @@ private fun MapView(
     AndroidView(
         factory = { context ->
             MapView(context).apply {
+                setTileSource(TileSourceFactory.MAPNIK)
+                zoomController.setZoomInEnabled(true)
+                zoomController.setZoomOutEnabled(true)
                 setMultiTouchControls(true)
+                setBuiltInZoomControls(true)
                 controller.setZoom(15.0)
+                zoomController.apply {
+                    setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
+                    activate()
+                }
+
             }
         },
         update = { mapView ->
