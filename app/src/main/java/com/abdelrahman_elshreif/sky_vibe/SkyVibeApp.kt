@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
+import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
@@ -40,6 +41,7 @@ fun SkyVibeApp(
     settingViewModel: SettingViewModel,
     favouriteViewModel: FavouriteViewModel,
     favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
+    alarmViewModel:AlarmViewModel,
     locationUtilities: LocationUtilities
 ) {
     val navController = rememberNavController()
@@ -85,6 +87,7 @@ fun SkyVibeApp(
                 favouriteViewModel,
                 settingViewModel,
                 favWeatherDetailViewModel,
+                alarmViewModel ,
                 paddingValues,
                 navController
             )

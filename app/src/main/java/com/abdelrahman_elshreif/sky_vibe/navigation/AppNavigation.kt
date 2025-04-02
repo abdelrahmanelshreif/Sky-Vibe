@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.abdelrahman_elshreif.sky_vibe.alarm.view.AlarmScreen
+import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.view.FavouriteWeatherDetails
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
@@ -29,6 +30,7 @@ fun AppNavigation(
     favouriteViewModel: FavouriteViewModel,
     settingViewModel: SettingViewModel,
     favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
+    alarmViewModel:AlarmViewModel,
     paddingValues: PaddingValues,
     navController: NavHostController
 ) {
@@ -44,7 +46,7 @@ fun AppNavigation(
             FavouriteScreen(favouriteViewModel, navController)
         }
         composable(Screen.Alarm.route) {
-            AlarmScreen()
+            AlarmScreen(alarmViewModel,navController)
         }
         composable(Screen.Settings.route) {
             SettingScreen(settingViewModel)
