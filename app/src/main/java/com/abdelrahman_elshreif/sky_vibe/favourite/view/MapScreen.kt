@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -95,9 +100,35 @@ fun MapScreen(
                 ) {
                     Text("Save Location")
                 }
+
+
             }
+
+
         }
+        LocationButton(
+            onClick = { viewModel.handleMapEvent(MapScreenEvent.OnLocateMeButtonPressed) },
+            modifier = Modifier
+                .align(alignment = Alignment.BottomEnd)
+                .padding(16.dp)
+        )
     }
+}
+
+@Composable
+fun LocationButton(onClick: () -> Unit, modifier: Modifier) {
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primary
+    ) {
+        Icon(
+            imageVector = Icons.Default.MyLocation,
+            contentDescription = "My Location",
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+
 }
 
 @SuppressLint("ClickableViewAccessibility")

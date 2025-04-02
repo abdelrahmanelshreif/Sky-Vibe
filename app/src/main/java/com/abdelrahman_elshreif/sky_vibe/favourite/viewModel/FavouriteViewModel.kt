@@ -2,9 +2,11 @@ package com.abdelrahman_elshreif.sky_vibe.favourite.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.util.query
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
+import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMApiServices
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenEvent
 import com.abdelrahman_elshreif.sky_vibe.favourite.model.MapScreenState
@@ -60,6 +62,20 @@ class FavouriteViewModel(
 
             MapScreenEvent.OnSaveLocation -> {
                 saveLocation()
+            }
+
+            is MapScreenEvent.OnLocateMeButtonPressed->{
+                handleLocateMe()
+            }
+        }
+    }
+
+    private fun handleLocateMe() {
+        viewModelScope.launch (Dispatchers.IO){
+            val loc = locationUtilities.getFreshLocation()
+            val locAddress = loc?.let { locationUtilities.getAddressFromLocation(it.latitude,loc.longitude) }
+            _uiState.update {
+                it.copy(selectedLocation = locAddress?.let { it1 -> NominatimLocation(it1,loc.latitude,loc.longitude) })
             }
         }
     }
