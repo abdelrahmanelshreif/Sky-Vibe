@@ -9,4 +9,5 @@ class FavouriteWeatherDetailsViewModel(
     val locationUtilities: LocationUtilities
 ):ViewModel() {
 
+
 }
