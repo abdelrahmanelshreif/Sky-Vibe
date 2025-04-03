@@ -11,8 +11,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
@@ -25,11 +30,12 @@ import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
+import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
 
 class SkyVibeApp : Application() {
-    lateinit var notificationManager: WeatherNotificationManager
-    lateinit var workManager: WorkManager
+    private lateinit var notificationManager: WeatherNotificationManager
+    private lateinit var workManager: WorkManager
 
     override fun onCreate() {
         super.onCreate()
@@ -61,54 +67,52 @@ fun SkyVibeApp(
     val navController = rememberNavController()
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar(containerColor = Color.White) {
-                getNavigationItems().forEachIndexed { index, navigationItem ->
-                    NavigationBarItem(
-                        selected = selectedNavigationIndex.intValue == index,
-                        onClick = {
-                            selectedNavigationIndex.intValue = index
-                            navController.navigate(navigationItem.route) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
+
+        Scaffold(
+            bottomBar = {
+                NavigationBar(containerColor = Color.White) {
+                    getNavigationItems().forEachIndexed { index, navigationItem ->
+                        NavigationBarItem(
+                            selected = selectedNavigationIndex.intValue == index,
+                            onClick = {
+                                selectedNavigationIndex.intValue = index
+                                navController.navigate(navigationItem.route) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = navigationItem.icon,
+                                    contentDescription = navigationItem.title
+                                )
+                            },
+                            label = {
+                                Text(
+                                    navigationItem.title,
+                                    color = if (index == selectedNavigationIndex.intValue)
+                                        Color.Black
+                                    else Color.Gray
+                                )
                             }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = navigationItem.icon,
-                                contentDescription = navigationItem.title
-                            )
-                        },
-                        label = {
-                            Text(
-                                navigationItem.title,
-                                color = if (index == selectedNavigationIndex.intValue)
-                                    Color.Black
-                                else Color.Gray
-                            )
-                        }
-                    )
+                        )
+                    }
                 }
+            },
+            content = { paddingValues ->
+                AppNavigation(
+                    homeViewModel,
+                    favouriteViewModel,
+                    settingViewModel,
+                    favWeatherDetailViewModel,
+                    alarmViewModel,
+                    paddingValues,
+                    navController
+                )
             }
-        },
-        content = { paddingValues ->
-            AppNavigation(
-                homeViewModel,
-                favouriteViewModel,
-                settingViewModel,
-                favWeatherDetailViewModel,
-                alarmViewModel,
-                paddingValues,
-                navController
-            )
-        }
-    )
-}
-
-
-
+        )
+    }
 
