@@ -45,6 +45,8 @@ fun AlertItem(
     onToggle: () -> Unit,
     onDelete: () -> Unit
 ) {
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -98,7 +100,7 @@ fun AlertItem(
                         checked = alert.isEnabled,
                         onCheckedChange = { onToggle() }
                     )
-                    IconButton(onClick = onDelete) {
+                    IconButton( onClick = { showDeleteDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete Alert",
@@ -108,6 +110,17 @@ fun AlertItem(
                 }
             }
         }
+    }
+    if (showDeleteDialog) {
+        DeleteConfirmationDialog(
+            onConfirm = {
+                onDelete()
+                showDeleteDialog = false
+            },
+            onDismiss = {
+                showDeleteDialog = false
+            }
+        )
     }
 }
 
