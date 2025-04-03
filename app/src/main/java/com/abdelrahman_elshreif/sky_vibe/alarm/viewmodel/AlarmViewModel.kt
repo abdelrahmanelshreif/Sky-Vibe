@@ -11,7 +11,9 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertWorker
+import com.abdelrahman_elshreif.sky_vibe.alarm.view.NotificationPermissionHandler
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,16 +28,30 @@ class AlarmViewModel(
     private val workManager: WorkManager
 ) : ViewModel() {
 
+
     private val _alertState = MutableStateFlow(WeatherAlertState())
     val alertState = _alertState.asStateFlow()
 
     private val _showAddDialog = MutableStateFlow(false)
     val showAddDialog = _showAddDialog.asStateFlow()
 
+    private val _notificationsEnabled = MutableStateFlow(false)
+    val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
     init {
         loadAlerts()
     }
+
+    fun initializeNotifications() {
+        _notificationsEnabled.value = true
+
+    }
+
+
+    fun disableNotifications() {
+        _notificationsEnabled.value = false
+    }
+
 
     fun onEvent(event: WeatherAlertEvent) {
         when (event) {

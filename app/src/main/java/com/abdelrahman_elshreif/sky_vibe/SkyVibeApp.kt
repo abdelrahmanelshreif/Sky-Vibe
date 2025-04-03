@@ -1,6 +1,7 @@
 package com.abdelrahman_elshreif.sky_vibe
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
@@ -14,6 +15,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
+import androidx.work.WorkManager
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
@@ -22,15 +24,27 @@ import com.abdelrahman_elshreif.sky_vibe.navigation.AppNavigation
 import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import org.osmdroid.config.Configuration
 
 class SkyVibeApp : Application() {
+    lateinit var notificationManager: WeatherNotificationManager
+    lateinit var workManager: WorkManager
+
     override fun onCreate() {
         super.onCreate()
         Configuration.getInstance().load(
             applicationContext,
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
         )
+        notificationManager = WeatherNotificationManager(applicationContext)
+        workManager = WorkManager.getInstance(applicationContext)
+    }
+
+    companion object {
+        fun getInstance(context: Context): SkyVibeApp {
+            return context.applicationContext as SkyVibeApp
+        }
     }
 }
 
@@ -41,7 +55,7 @@ fun SkyVibeApp(
     settingViewModel: SettingViewModel,
     favouriteViewModel: FavouriteViewModel,
     favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
-    alarmViewModel:AlarmViewModel,
+    alarmViewModel: AlarmViewModel,
     locationUtilities: LocationUtilities
 ) {
     val navController = rememberNavController()
@@ -87,7 +101,7 @@ fun SkyVibeApp(
                 favouriteViewModel,
                 settingViewModel,
                 favWeatherDetailViewModel,
-                alarmViewModel ,
+                alarmViewModel,
                 paddingValues,
                 navController
             )

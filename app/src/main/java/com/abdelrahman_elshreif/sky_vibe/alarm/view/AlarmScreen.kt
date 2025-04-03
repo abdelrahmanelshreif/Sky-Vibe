@@ -28,6 +28,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,7 @@ import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
+import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.NotificationHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,9 +46,20 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
 
     val alertState by viewModel.alertState.collectAsState()
     val showAddDialog by viewModel.showAddDialog.collectAsState()
+    val context = LocalContext.current
 
+    NotificationPermissionHandler(
+        onPermissionGranted = {
+            NotificationHelper.createNotificationChannel(context)
+            viewModel.initializeNotifications()
+        },
+        onPermissionDenied = {
+            viewModel.disableNotifications()
+        }
+    )
 
     Scaffold(floatingActionButton = {
+
         FloatingActionButton(onClick = { viewModel.onEvent(WeatherAlertEvent.OnAddAlertClick) }) {
             Icon(
                 Icons.Default.AddAlarm, contentDescription = stringResource(R.string.add_alarm)

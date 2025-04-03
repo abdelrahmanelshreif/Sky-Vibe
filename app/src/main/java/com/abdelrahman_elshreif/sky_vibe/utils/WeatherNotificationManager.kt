@@ -14,23 +14,9 @@ import com.abdelrahman_elshreif.sky_vibe.R
 
 class WeatherNotificationManager(private val context: Context) {
 
-    fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.weather_alert),
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Weather alert notifications"
-            }
-            context.getSystemService(NotificationManager::class.java)
-                ?.createNotificationChannel(channel)
-        }
-    }
 
     fun showNotification(alertId: Long, message: String?) {
         val notificationManager = NotificationManagerCompat.from(context)
-        if (!hasNotificationPermission()) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.weather_alert)
@@ -50,19 +36,21 @@ class WeatherNotificationManager(private val context: Context) {
         notificationManager.notify(alertId.toInt(), notification)
     }
 
-
-    private fun hasNotificationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-    }
-
     companion object {
         const val CHANNEL_ID = "weather_alerts"
+
+        fun createNotificationChannel(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    context.getString(R.string.weather_alert),
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Weather alert notifications"
+                }
+                context.getSystemService(NotificationManager::class.java)
+                    ?.createNotificationChannel(channel)
+            }
+        }
     }
 }
