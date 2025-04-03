@@ -14,7 +14,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.abdelrahman_elshreif.sky_vibe.data.model.LocationHolder
+import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -96,7 +96,7 @@ class LocationUtilities(private val context: Context) {
         )
     }
 
-    private fun getAddressFromLocation(lat: Double, lon: Double): String {
+    fun getAddressFromLocation(lat: Double, lon: Double): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(lat, lon, 1)
@@ -145,15 +145,15 @@ class LocationUtilities(private val context: Context) {
     suspend fun saveLocationFromMapToDataStore(
         lat: Double,
         lon: Double,
-        address:String? = null
-    ){
-        val locationHolder = LocationHolder(
+        address: String? = null
+    ) {
+        val locationHolder = SkyVibeLocation(
             latitude = lat,
             longitude = lon,
             address = address
         )
 
-        context.dataStore.edit {preferences->
+        context.dataStore.edit { preferences ->
             preferences[LATITUDE] = locationHolder.latitude
             preferences[LONGITUDE] = locationHolder.longitude
             locationHolder.address?.let {

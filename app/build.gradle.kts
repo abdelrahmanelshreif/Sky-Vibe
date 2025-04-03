@@ -45,7 +45,7 @@ val nav_version = "2.8.8"
 
 dependencies {
 
-
+    implementation ("androidx.work:work-runtime-ktx:2.9.0")
     // OpenStreetMap Library
     implementation("org.osmdroid:osmdroid-android:6.1.11")
 

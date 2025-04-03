@@ -1,8 +1,10 @@
 package com.abdelrahman_elshreif.sky_vibe
 
+import android.app.Application
+import android.content.Context
 import android.os.Build
+import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -11,23 +13,51 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.abdelrahman_elshreif.sky_vibe.alarm.view.AlarmScreen
-import com.abdelrahman_elshreif.sky_vibe.favourite.view.FavouriteScreen
-import com.abdelrahman_elshreif.sky_vibe.home.view.HomeScreen
+import androidx.work.WorkManager
+import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
+import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
+import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
-import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
+import com.abdelrahman_elshreif.sky_vibe.navigation.AppNavigation
 import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
-import com.abdelrahman_elshreif.sky_vibe.settings.view.SettingScreen
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
+import org.osmdroid.config.Configuration
+
+class SkyVibeApp : Application() {
+    lateinit var notificationManager: WeatherNotificationManager
+    lateinit var workManager: WorkManager
+
+    override fun onCreate() {
+        super.onCreate()
+        Configuration.getInstance().load(
+            applicationContext,
+            PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        )
+        notificationManager = WeatherNotificationManager(applicationContext)
+        workManager = WorkManager.getInstance(applicationContext)
+    }
+
+    companion object {
+        fun getInstance(context: Context): SkyVibeApp {
+            return context.applicationContext as SkyVibeApp
+        }
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel) {
+fun SkyVibeApp(
+    homeViewModel: HomeViewModel,
+    settingViewModel: SettingViewModel,
+    favouriteViewModel: FavouriteViewModel,
+    favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
+    alarmViewModel: AlarmViewModel,
+    locationUtilities: LocationUtilities
+) {
     val navController = rememberNavController()
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
@@ -66,24 +96,15 @@ fun SkyVibeApp(homeViewModel: HomeViewModel, settingViewModel: SettingViewModel)
             }
         },
         content = { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home.route,
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                composable(Screen.Home.route) {
-                    HomeScreen(homeViewModel)
-                }
-                composable(Screen.Favourite.route) {
-                    FavouriteScreen()
-                }
-                composable(Screen.Alarm.route) {
-                    AlarmScreen()
-                }
-                composable(Screen.Settings.route) {
-                    SettingScreen(settingViewModel)
-                }
-            }
+            AppNavigation(
+                homeViewModel,
+                favouriteViewModel,
+                settingViewModel,
+                favWeatherDetailViewModel,
+                alarmViewModel,
+                paddingValues,
+                navController
+            )
         }
     )
 }
