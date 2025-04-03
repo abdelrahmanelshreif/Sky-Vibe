@@ -54,4 +54,5 @@
     <string name="weather_alert">Weather Alert</string>
     <string name="tap_to_add_a_new_alert">Tap + to add a new alert</string>
     <string name="no_alerts_set">No alerts set</string>
+    <string name="add_alarm">Add Alarm</string>
 </resources>
