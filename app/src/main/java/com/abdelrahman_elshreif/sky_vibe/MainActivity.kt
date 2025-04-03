@@ -18,6 +18,7 @@ import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import androidx.lifecycle.lifecycleScope
+import androidx.work.WorkManager
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeDatabase
@@ -41,7 +42,10 @@ class MainActivity : ComponentActivity() {
         val homeFactory = HomeViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
-                SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
+                SkyVibeLocalDataSource(
+                    SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
+                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                )
             ),
             locationUtilities,
             SettingDataStore(this)
@@ -49,7 +53,10 @@ class MainActivity : ComponentActivity() {
         val favouriteFactory = FavouriteViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
-                SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
+                SkyVibeLocalDataSource(
+                    SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
+                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                )
             ),
             locationUtilities
         )
@@ -57,15 +64,22 @@ class MainActivity : ComponentActivity() {
         val favWeatherDetailFactory = FavouriteWeatherDetailsViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
-                SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
+                SkyVibeLocalDataSource(
+                    SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
+                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                )
             ),
             locationUtilities, SettingDataStore(this)
         )
         val alarmViewModelFactory = AlarmViewModelFactory(
             SkyVibeRepository.getInstance(
                 ForecastingRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
-                SkyVibeLocalDataSource(SkyVibeDatabase.getInstance(this).getFavouriteLocationDao())
-            )
+                SkyVibeLocalDataSource(
+                    SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
+                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                )
+            ),
+            WorkManager.getInstance(this)
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }

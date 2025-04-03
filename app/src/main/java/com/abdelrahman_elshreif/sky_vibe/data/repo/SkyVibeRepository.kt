@@ -1,5 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe.data.repo
 
+import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
@@ -75,4 +76,21 @@ class SkyVibeRepository private constructor(
             val response = remoteDataSource.getSuggestedLocations(query)
             emit(response)
         }
+
+    suspend fun getAlerts(): Flow<List<WeatherAlert>> {
+        return localDataSource.getAlerts()
+    }
+
+    suspend fun addNewAlert(weatherAlert: WeatherAlert): Long {
+        return localDataSource.addAlert(weatherAlert)
+    }
+
+    suspend fun deleteAlert(weatherAlert: WeatherAlert) {
+        return localDataSource.deleteAlert(weatherAlert)
+    }
+
+    suspend fun updateAlert(weatherAlert: WeatherAlert) {
+        return localDataSource.updateAlert(weatherAlert)
+    }
+
 }

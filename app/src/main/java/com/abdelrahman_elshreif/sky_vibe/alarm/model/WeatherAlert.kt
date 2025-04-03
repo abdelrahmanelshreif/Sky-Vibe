@@ -1,7 +1,9 @@
 package com.abdelrahman_elshreif.sky_vibe.alarm.model
 
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Entity(tableName = "alerts")
 data class WeatherAlert(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

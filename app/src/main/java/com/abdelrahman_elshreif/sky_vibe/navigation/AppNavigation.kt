@@ -46,7 +46,7 @@ fun AppNavigation(
             FavouriteScreen(favouriteViewModel, navController)
         }
         composable(Screen.Alarm.route) {
-            AlarmScreen(alarmViewModel,navController)
+            AlarmScreen(alarmViewModel)
         }
         composable(Screen.Settings.route) {
             SettingScreen(settingViewModel)

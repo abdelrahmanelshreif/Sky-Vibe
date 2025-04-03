@@ -50,4 +50,8 @@
     <string name="save_location">Save Location</string>
     <string name="my_location">My Location</string>
     <string name="search_for_location">Search for location...</string>
+    <string name="add_alert">Add Alert</string>
+    <string name="weather_alert">Weather Alert</string>
+    <string name="tap_to_add_a_new_alert">Tap + to add a new alert</string>
+    <string name="no_alerts_set">No alerts set</string>
 </resources>
