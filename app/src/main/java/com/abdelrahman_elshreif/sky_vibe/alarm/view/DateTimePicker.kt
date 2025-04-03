@@ -56,7 +56,6 @@ fun DateTimePicker(
             Text(dateTimeFormat.format(Date(dateTime)))
         }
 
-        // Date Picker Dialog
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState(
                 initialSelectedDateMillis = dateTime
@@ -87,7 +86,6 @@ fun DateTimePicker(
             }
         }
 
-        // Time Picker Dialog
         if (showTimePicker) {
             val timePickerState = rememberTimePickerState()
 

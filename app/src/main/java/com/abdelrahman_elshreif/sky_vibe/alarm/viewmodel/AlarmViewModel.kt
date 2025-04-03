@@ -1,5 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class AlarmViewModel(
@@ -81,6 +83,18 @@ class AlarmViewModel(
     }
 
     private fun scheduleAlert(alert: WeatherAlert) {
+        val currentTime = System.currentTimeMillis()
+        val delayTime = alert.startTime - currentTime + 300000
+
+
+        Log.d("WeatherAlert", "Current time: $currentTime")
+        Log.d("WeatherAlert", "Alert time: ${alert.startTime}")
+        Log.d("WeatherAlert", "Delay: $delayTime")
+
+        if (delayTime <= 0) {
+            Log.d("WeatherAlert", "Alert time is in the past or present, skipping scheduling")
+            return
+        }
 
         val inputData = workDataOf(
             "alertId" to alert.id,
@@ -88,11 +102,9 @@ class AlarmViewModel(
             "description" to alert.description
         )
 
-        val delayTime = alert.startTime - System.currentTimeMillis()
-
         val alertWork = OneTimeWorkRequestBuilder<WeatherAlertWorker>()
             .setInputData(inputData)
-            .setInitialDelay(delayTime, TimeUnit.MILLISECONDS)
+            .setInitialDelay(alert.startTime - currentTime, TimeUnit.MILLISECONDS)
             .addTag("alert_${alert.id}")
             .build()
 
@@ -102,6 +114,7 @@ class AlarmViewModel(
             alertWork
         )
 
+        Log.d("WeatherAlert", "Alert scheduled successfully for ${Date(alert.startTime)}")
     }
 
     private fun toggleAlert(alert: WeatherAlert) {
