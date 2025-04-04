@@ -135,6 +135,13 @@ class LocationUtilities(private val context: Context) {
         }.firstOrNull()
     }
 
+    suspend fun clearLocationFromSharedPrefs() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(LATITUDE)
+            preferences.remove(LONGITUDE)
+        }
+    }
+
      suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
         context.dataStore.edit { preferences ->
             preferences[LATITUDE] = latitude
