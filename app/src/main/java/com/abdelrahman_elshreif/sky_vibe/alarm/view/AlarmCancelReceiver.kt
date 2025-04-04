@@ -16,13 +16,10 @@ class AlarmCancelReceiver : BroadcastReceiver() {
             val alertId = intent.getLongExtra("alertId", 0)
             Log.d("Alarm", "Received stop action for alarm $alertId")
 
-            // Stop the alarm sound
             WeatherAlarmPlayer.stop()
 
-            // Cancel the notification
             NotificationManagerCompat.from(context).cancel(alertId.toInt())
 
-            // Cancel the work
             WorkManager.getInstance(context)
                 .cancelUniqueWork("alert_${alertId}")
                 .result
