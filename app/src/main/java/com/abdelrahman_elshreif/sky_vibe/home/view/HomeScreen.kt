@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,22 +12,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,15 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.abdelrahman_elshreif.sky_vibe.R
-import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.ErrorState
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.HomeContent
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.LoadingWeatherState
-import com.abdelrahman_elshreif.sky_vibe.home.view.components.NextDaysForecast
-import com.abdelrahman_elshreif.sky_vibe.home.view.components.TodayHourlyForecast
-import com.abdelrahman_elshreif.sky_vibe.home.view.components.WeatherDetailsCard
-import com.abdelrahman_elshreif.sky_vibe.home.view.components.WeatherHeader
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.map.view.MapScreen
 
@@ -74,6 +60,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
     val windUnit by homeViewModel.windUnit.collectAsState()
     val locationMethod by homeViewModel.locationMethod.collectAsState()
     val savedLocation by homeViewModel.savedLocation.collectAsState(null)
+    val savedAddress by homeViewModel.savedAddress.collectAsState("")
     var showLocationSelection by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
@@ -151,7 +138,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                     weatherData != null -> HomeContent(
                         weatherData = weatherData!!,
                         tempUnit = tempUnit,
-                        windUnit = windUnit
+                        windUnit = windUnit,
+                        address = savedAddress
                     )
                     else -> ErrorState()
                 }

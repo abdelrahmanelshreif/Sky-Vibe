@@ -11,12 +11,9 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertWorker
-import com.abdelrahman_elshreif.sky_vibe.alarm.view.NotificationPermissionHandler
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
-import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch

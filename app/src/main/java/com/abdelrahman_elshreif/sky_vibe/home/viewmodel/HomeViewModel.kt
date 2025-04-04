@@ -45,19 +45,32 @@ class HomeViewModel(
     private val _savedLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     val savedLocation = _savedLocation.asStateFlow()
 
+    private val _savedAddress = MutableStateFlow<String>("")
+    val savedAddress = _savedAddress.asStateFlow()
 
     init {
         fetchSetting()
         fetchLocation()
+
 
         viewModelScope.launch {
             loadSavedLocation()
         }
     }
 
+    private fun fetchAddress() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _savedAddress.value = locationUtilities.getAddressFromLocation(
+                lat = _location.value!!.first,
+                lon = _location.value!!.second
+            )
+        }
+    }
+
     private suspend fun loadSavedLocation() {
         _savedLocation.value = locationUtilities.getLocationFromDataStore()
     }
+
 
     private fun fetchSetting() {
         viewModelScope.launch {
@@ -135,7 +148,7 @@ class HomeViewModel(
                 }
                 .collect { weatherData ->
                     _homeWeatherData.value = weatherData
-                    locationUtilities.saveLocationFromMapToDataStore(lat, lon)
+                    locationUtilities.saveLocationToDataStore(lat, lon)
                 }
             _isLoading.value = false
         }
@@ -143,7 +156,7 @@ class HomeViewModel(
 
     fun saveSelectedLocation(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
-            locationUtilities.saveLocationFromMapToDataStore(lat, lon)
+            locationUtilities.saveLocationToDataStore(lat, lon)
         }
 
     }
@@ -155,6 +168,8 @@ class HomeViewModel(
                 _location.value = it
                 fetchWeatherData(it.first, it.second)
             }
+            Log.i("TA2G", "fetchLocation: ${_location.value!!.first} ${_location.value!!.second}")
+            fetchAddress()
         }
     }
 
@@ -178,4 +193,3 @@ class HomeViewModel(
         }
     }
 }
-

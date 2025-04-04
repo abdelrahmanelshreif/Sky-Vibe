@@ -53,6 +53,7 @@ fun FavouriteWeatherDetails(
     val windUint = favouriteWeatherDetailsViewModel.windUnit.collectAsState()
     val weather = favouriteWeatherDetailsViewModel.favouriteWeatherData.collectAsState()
     val isLoading = favouriteWeatherDetailsViewModel.isLoading.collectAsState()
+    val address = favouriteWeatherDetailsViewModel.address.collectAsState()
 
     LaunchedEffect(Unit) {
         favouriteWeatherDetailsViewModel.fetchWeatherData(lat, lon)
@@ -71,11 +72,11 @@ fun FavouriteWeatherDetails(
                 weather.value != null -> FavouriteLocationContent(
                     weather.value!!,
                     tempUnit.value,
-                    windUint.value
+                    windUint.value,
+                    address.value
                 )
             }
         }
-
         Box(
             modifier = Modifier
                 .padding(16.dp)
@@ -107,6 +108,7 @@ fun FavouriteLocationContent(
     weatherData: WeatherResponse,
     tempUnit: String,
     windUnit: String,
+    address: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -115,7 +117,7 @@ fun FavouriteLocationContent(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            WeatherHeader(weatherData, tempUnit)
+            WeatherHeader(weatherData, tempUnit, address)
             Spacer(modifier = Modifier.height(16.dp))
             WeatherDetailsCard(weatherData, windUnit)
             Spacer(modifier = Modifier.height(16.dp))

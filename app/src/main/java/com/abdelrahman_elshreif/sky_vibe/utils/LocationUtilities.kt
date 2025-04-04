@@ -3,6 +3,7 @@ package com.abdelrahman_elshreif.sky_vibe.utils
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
@@ -16,9 +17,11 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.google.android.gms.location.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -33,17 +36,13 @@ class LocationUtilities(private val context: Context) {
     private val LONGITUDE = doublePreferencesKey("longitude")
     private val ADDRESS = stringPreferencesKey("address")
 
-
     @SuppressLint("MissingPermission")
     suspend fun getFreshLocation(): Location? {
         return suspendCancellableCoroutine { continuation ->
-            val locationRequest = LocationRequest.Builder(10000L).apply {
-                setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            }.build()
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L).build()
 
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult) {
-                    super.onLocationResult(result)
                     val location = result.lastLocation
                     if (location != null) {
                         continuation.resume(location)
@@ -64,17 +63,12 @@ class LocationUtilities(private val context: Context) {
     }
 
     suspend fun getOrFetchLocation(): Pair<Double, Double>? {
-        val savedLocation = getLocationFromDataStore()
-        if (savedLocation != null) {
-            return savedLocation
-        } else {
-            val (location, _) = fetchLocationAndAddress()
-            if (location != null) {
-                saveLocationToDataStore(location.latitude, location.longitude)
-                return Pair(location.latitude, location.longitude)
+        return getLocationFromDataStore() ?: fetchLocationAndAddress().let { (location, _) ->
+            location?.let {
+                saveLocationToDataStore(it.latitude, it.longitude)
+                Pair(it.latitude, it.longitude)
             }
         }
-        return null
     }
 
     private fun checkLocationAvailability(): Boolean {
@@ -84,9 +78,9 @@ class LocationUtilities(private val context: Context) {
     private fun checkPermissions(): Boolean {
         return (ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(
+        ) == PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+        ) == PackageManager.PERMISSION_GRANTED)
     }
 
     private fun isLocationEnabled(): Boolean {
@@ -96,20 +90,20 @@ class LocationUtilities(private val context: Context) {
         )
     }
 
-    fun getAddressFromLocation(lat: Double, lon: Double): String {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        return try {
-            val addresses = geocoder.getFromLocation(lat, lon, 1)
-            if (!addresses.isNullOrEmpty()) {
-                val city = addresses[0].locality ?: addresses[0].subAdminArea ?: ""
-                val country = addresses[0].countryName ?: ""
-                "$city, $country".trim().replace("^, ".toRegex(), "")
-            } else "Unknown Location"
-        } catch (ex: Exception) {
-            "Error fetching address: ${ex.message}"
+    suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
+        return withContext(Dispatchers.IO) {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            try {
+                val addresses = geocoder.getFromLocation(lat, lon, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val city = addresses[0].locality ?: addresses[0].subAdminArea ?: ""
+                    val country = addresses[0].countryName ?: ""
+                    "$city, $country".trim().replace("^, ".toRegex(), "")
+                } else "Unknown Location"
+            } catch (ex: Exception) {
+                "Error fetching address: ${ex.message}"
+            }
         }
-
-
     }
 
     private suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
@@ -141,31 +135,10 @@ class LocationUtilities(private val context: Context) {
         }.firstOrNull()
     }
 
-    private suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
+     suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
         context.dataStore.edit { preferences ->
             preferences[LATITUDE] = latitude
             preferences[LONGITUDE] = longitude
         }
     }
-
-    suspend fun saveLocationFromMapToDataStore(
-        lat: Double,
-        lon: Double,
-        address: String? = null
-    ) {
-        val locationHolder = SkyVibeLocation(
-            latitude = lat,
-            longitude = lon,
-            address = address
-        )
-
-        context.dataStore.edit { preferences ->
-            preferences[LATITUDE] = locationHolder.latitude
-            preferences[LONGITUDE] = locationHolder.longitude
-            locationHolder.address?.let {
-                preferences[ADDRESS] = it
-            }
-        }
-    }
-
 }

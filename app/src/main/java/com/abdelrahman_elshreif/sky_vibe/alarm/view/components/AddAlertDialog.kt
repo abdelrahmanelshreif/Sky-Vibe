@@ -1,28 +1,17 @@
-package com.abdelrahman_elshreif.sky_vibe.alarm.view
+package com.abdelrahman_elshreif.sky_vibe.alarm.view.components
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 @SuppressLint("AutoboxingStateCreation")
 @Composable
