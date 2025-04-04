@@ -1,6 +1,7 @@
 package com.abdelrahman_elshreif.sky_vibe
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,6 +9,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateOf
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.remote.ForecastingRemoteDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.remote.RetrofitHelper
@@ -28,15 +31,23 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.Fa
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var locationUtilities: LocationUtilities
+    private var splashScreenVisible = mutableStateOf(true)
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        //Splash Screen
+        installSplashScreen().setKeepOnScreenCondition { splashScreenVisible.value }
+        lifecycleScope.launch {
+            delay(2000)
+            splashScreenVisible.value = false
+        }
         // initializing ViewModels
         locationUtilities = LocationUtilities(this)
         val homeFactory = HomeViewModelFactory(
@@ -79,7 +90,8 @@ class MainActivity : ComponentActivity() {
                     SkyVibeDatabase.getInstance(this).getAlertsDao()
                 )
             ),
-            WorkManager.getInstance(this)
+            WorkManager.getInstance(this),
+            locationUtilities,
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }

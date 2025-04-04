@@ -11,9 +11,8 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertWorker
-import com.abdelrahman_elshreif.sky_vibe.alarm.view.NotificationPermissionHandler
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
-import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,8 @@ import java.util.concurrent.TimeUnit
 
 class AlarmViewModel(
     private val repository: SkyVibeRepository,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val locationUtilities: LocationUtilities
 ) : ViewModel() {
 
 
@@ -37,6 +37,8 @@ class AlarmViewModel(
 
     private val _notificationsEnabled = MutableStateFlow(false)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
+
+
 
     init {
         loadAlerts()
@@ -81,6 +83,8 @@ class AlarmViewModel(
         viewModelScope.launch(Dispatchers.IO) {
 
             try {
+                val loc = locationUtilities.getLocationFromDataStore()
+                alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first,loc.second)
                 repository.addNewAlert(alert)
 
                 scheduleAlert(alert)
@@ -100,27 +104,28 @@ class AlarmViewModel(
 
     private fun scheduleAlert(alert: WeatherAlert) {
         val currentTime = System.currentTimeMillis()
-        val delayTime = alert.startTime - currentTime + 300000
+        val delayTime = alert.startTime - currentTime
 
+        Log.d("ALARM", "Current time: ${Date(currentTime)}")
+        Log.d("ALARM", "Alert time: ${Date(alert.startTime)}")
+        Log.d("ALARM", "Delay: $delayTime ms")
 
-        Log.d("WeatherAlert", "Current time: $currentTime")
-        Log.d("WeatherAlert", "Alert time: ${alert.startTime}")
-        Log.d("WeatherAlert", "Delay: $delayTime")
-
-        if (delayTime <= 0) {
-            Log.d("WeatherAlert", "Alert time is in the past or present, skipping scheduling")
+        if (delayTime < 10000) {
+            Log.d("ALARM", "Alert time is too close or in past, adding to immediate queue")
             return
         }
 
+        val endTime = alert.endTime
         val inputData = workDataOf(
             "alertId" to alert.id,
             "alertType" to alert.type.name,
-            "description" to alert.description
+            "message" to alert.description,
+            "endTime" to endTime
         )
 
         val alertWork = OneTimeWorkRequestBuilder<WeatherAlertWorker>()
             .setInputData(inputData)
-            .setInitialDelay(alert.startTime - currentTime, TimeUnit.MILLISECONDS)
+            .setInitialDelay(delayTime, TimeUnit.MILLISECONDS)
             .addTag("alert_${alert.id}")
             .build()
 
@@ -129,8 +134,6 @@ class AlarmViewModel(
             ExistingWorkPolicy.REPLACE,
             alertWork
         )
-
-        Log.d("WeatherAlert", "Alert scheduled successfully for ${Date(alert.startTime)}")
     }
 
     private fun toggleAlert(alert: WeatherAlert) {

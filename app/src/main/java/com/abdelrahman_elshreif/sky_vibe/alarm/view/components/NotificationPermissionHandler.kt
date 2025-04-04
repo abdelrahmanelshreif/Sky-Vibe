@@ -1,4 +1,4 @@
-package com.abdelrahman_elshreif.sky_vibe.alarm.view
+package com.abdelrahman_elshreif.sky_vibe.alarm.view.components
 
 import android.Manifest
 import android.content.pm.PackageManager

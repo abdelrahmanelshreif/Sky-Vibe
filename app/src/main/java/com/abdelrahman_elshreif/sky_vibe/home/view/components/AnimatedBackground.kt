@@ -1,4 +1,4 @@
-package com.abdelrahman_elshreif.sky_vibe.home.view
+package com.abdelrahman_elshreif.sky_vibe.home.view.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*

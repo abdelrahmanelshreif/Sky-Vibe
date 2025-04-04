@@ -1,4 +1,4 @@
-package com.abdelrahman_elshreif.sky_vibe.alarm.view
+package com.abdelrahman_elshreif.sky_vibe.alarm.view.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults

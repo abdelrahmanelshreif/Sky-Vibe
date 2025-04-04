@@ -8,6 +8,7 @@ import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 class FavouriteWeatherDetailsViewModel(
     private val repository: SkyVibeRepository,
     private val settingDataStore: SettingDataStore,
-    val locationUtilities: LocationUtilities
+    private val locationUtilities: LocationUtilities
 ) : ViewModel() {
 
     private val _favouriteWeatherData = MutableStateFlow<WeatherResponse?>(null)
@@ -39,9 +40,23 @@ class FavouriteWeatherDetailsViewModel(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
 
+    private val _address = MutableStateFlow<String>(" ")
+    val address = _address.asStateFlow()
 
     init {
         fetchSetting()
+    }
+
+    fun fetchAddress(lat: Double, lon: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val addressResult = locationUtilities.getAddressFromLocation(lat, lon)
+                _address.value = addressResult
+            } catch (e: Exception) {
+                _address.value = "Unknown Location"
+                _toastEvent.emit("Error fetching address: ${e.message}")
+            }
+        }
     }
 
     private fun fetchSetting() {
@@ -61,7 +76,6 @@ class FavouriteWeatherDetailsViewModel(
                         _windUnit.value = windUnit
                     }
             }
-
         }
     }
 
@@ -110,6 +124,8 @@ class FavouriteWeatherDetailsViewModel(
                 }
                 .collect { weatherData ->
                     _favouriteWeatherData.value = weatherData
+
+                    fetchAddress(lat, lon)
                 }
             _isLoading.value = false
         }
