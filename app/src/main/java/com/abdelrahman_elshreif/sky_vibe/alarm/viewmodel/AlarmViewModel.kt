@@ -83,6 +83,8 @@ class AlarmViewModel(
         viewModelScope.launch(Dispatchers.IO) {
 
             try {
+                val loc = locationUtilities.getLocationFromDataStore()
+                alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first,loc.second)
                 repository.addNewAlert(alert)
 
                 scheduleAlert(alert)
