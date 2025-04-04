@@ -63,11 +63,15 @@ class LocationUtilities(private val context: Context) {
     }
 
     suspend fun getOrFetchLocation(): Pair<Double, Double>? {
-        return getLocationFromDataStore() ?: fetchLocationAndAddress().let { (location, _) ->
-            location?.let {
-                saveLocationToDataStore(it.latitude, it.longitude)
-                Pair(it.latitude, it.longitude)
+        return if (checkPermissions() && isLocationEnabled()) {
+            fetchLocationAndAddress().let { (location, _) ->
+                location?.let {
+                    saveLocationToDataStore(it.latitude, it.longitude)
+                    Pair(it.latitude, it.longitude)
+                }
             }
+        } else {
+            getLocationFromDataStore()
         }
     }
 
@@ -148,4 +152,6 @@ class LocationUtilities(private val context: Context) {
             preferences[LONGITUDE] = longitude
         }
     }
+
+
 }

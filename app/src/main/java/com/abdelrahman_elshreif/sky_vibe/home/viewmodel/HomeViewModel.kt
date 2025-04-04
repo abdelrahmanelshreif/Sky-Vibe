@@ -20,7 +20,6 @@ class HomeViewModel(
     private val settingDataStore: SettingDataStore,
 ) : ViewModel() {
 
-
     private val _homeWeatherData = MutableStateFlow<WeatherResponse?>(null)
     val homeWeatherData = _homeWeatherData.asStateFlow()
 
@@ -45,32 +44,59 @@ class HomeViewModel(
     private val _savedLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     val savedLocation = _savedLocation.asStateFlow()
 
-    private val _savedAddress = MutableStateFlow<String>("")
+    private val _savedAddress = MutableStateFlow("")
     val savedAddress = _savedAddress.asStateFlow()
 
     init {
-        fetchSetting()
-        fetchLocation()
-
-
         viewModelScope.launch {
-            loadSavedLocation()
+            _savedLocation.value = locationUtilities.getLocationFromDataStore()
+            _savedLocation.value?.let { (lat, lon) ->
+                updateAddress(lat, lon)
+            }
         }
+        fetchSetting()
     }
 
-    private fun fetchAddress() {
+    private fun updateAddress(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
-            _savedAddress.value = locationUtilities.getAddressFromLocation(
-                lat = _location.value!!.first,
-                lon = _location.value!!.second
-            )
+            _savedAddress.value = locationUtilities.getAddressFromLocation(lat, lon)
         }
     }
 
-    private suspend fun loadSavedLocation() {
-        _savedLocation.value = locationUtilities.getLocationFromDataStore()
+    suspend fun getSavedLocation(): Pair<Double, Double>? {
+        return locationUtilities.getLocationFromDataStore()
     }
 
+    fun saveSelectedLocationAndFetch(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            locationUtilities.saveLocationToDataStore(lat, lon)
+            _savedLocation.value = Pair(lat, lon)
+            _location.value = Pair(lat, lon)
+            updateAddress(lat, lon)
+            fetchWeatherData(lat, lon)
+        }
+    }
+
+    private fun onLocationMethodChanged() {
+        viewModelScope.launch {
+            when (_locationMethod.value) {
+                "gps" -> {
+                    locationUtilities.clearLocationFromSharedPrefs()
+                    _savedLocation.value = null
+                    fetchLocationAndWeather()
+                }
+                "map" -> {
+                    val saved = locationUtilities.getLocationFromDataStore()
+                    _savedLocation.value = saved
+                    saved?.let { (lat, lon) ->
+                        _location.value = Pair(lat, lon)
+                        updateAddress(lat, lon)
+                        fetchWeatherData(lat, lon)
+                    }
+                }
+            }
+        }
+    }
 
     private fun fetchSetting() {
         viewModelScope.launch {
@@ -98,6 +124,7 @@ class HomeViewModel(
                     .catch { e -> Log.e("HomeViewModel", "Error collecting locationMethod", e) }
                     .collect { locMethod ->
                         _locationMethod.value = locMethod
+                        onLocationMethodChanged()
                     }
             }
         }
@@ -148,34 +175,26 @@ class HomeViewModel(
                 }
                 .collect { weatherData ->
                     _homeWeatherData.value = weatherData
-                    locationUtilities.saveLocationToDataStore(lat, lon)
                 }
             _isLoading.value = false
         }
-    }
-
-    fun saveSelectedLocation(lat: Double, lon: Double) {
-        viewModelScope.launch(Dispatchers.IO) {
-            locationUtilities.saveLocationToDataStore(lat, lon)
-        }
-
     }
 
     private fun fetchLocation() {
         viewModelScope.launch {
             val loc = locationUtilities.getOrFetchLocation()
             loc?.let {
-                _location.value = it
-                fetchWeatherData(it.first, it.second)
+                if (_location.value != it) {
+                    _location.value = it
+                    updateAddress(it.first, it.second)
+                    fetchWeatherData(it.first, it.second)
+                }
             }
-            Log.i("TA2G", "fetchLocation: ${_location.value!!.first} ${_location.value!!.second}")
-            fetchAddress()
         }
     }
 
     fun fetchLocationAndWeather() {
         fetchLocation()
-        fetchWeatherData(_location.value?.first ?: 0.0, _location.value?.second ?: 0.0)
     }
 
     private fun convertTemperature(temp: Double?, tempUnit: String): Double {

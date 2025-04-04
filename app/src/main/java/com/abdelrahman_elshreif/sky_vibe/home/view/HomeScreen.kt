@@ -87,15 +87,21 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
         }
     }
 
-    LaunchedEffect(savedLocation) {
-        if (savedLocation != null) {
-            val (lat, lon) = savedLocation!!
-            homeViewModel.fetchWeatherData(lat, lon)
-        } else {
-            if (!context.hasPermission(locationPermission)) {
-                permissionLauncher.launch(locationPermission)
-            } else {
-                homeViewModel.fetchLocationAndWeather()
+    LaunchedEffect(locationMethod) {
+        when (locationMethod) {
+            "gps" -> {
+                if (!context.hasPermission(locationPermission)) {
+                    permissionLauncher.launch(locationPermission)
+                } else {
+                    homeViewModel.fetchLocationAndWeather()
+                }
+            }
+            "map" -> {
+                if (savedLocation == null) {
+                    showLocationSelection = true
+                } else {
+                    homeViewModel.fetchWeatherData(savedLocation!!.first, savedLocation!!.second)
+                }
             }
         }
     }
@@ -107,8 +113,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
             isLocationSelection = true,
             onLocationSelected = { lat, lon ->
                 showLocationSelection = false
-                homeViewModel.fetchWeatherData(lat, lon)
-                homeViewModel.saveSelectedLocation(lat, lon)
+                homeViewModel.saveSelectedLocationAndFetch(lat, lon)
             },
             locationMethod = locationMethod
         )
