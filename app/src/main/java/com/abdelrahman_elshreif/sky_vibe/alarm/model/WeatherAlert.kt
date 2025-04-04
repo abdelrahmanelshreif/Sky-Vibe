@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class WeatherAlert(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val alertArea: String = "UNKNOWN LOCATION",
     val startTime: Long,
     val endTime: Long,
     val type: AlertType,

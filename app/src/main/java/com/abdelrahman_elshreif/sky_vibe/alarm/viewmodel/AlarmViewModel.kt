@@ -13,6 +13,7 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertWorker
 import com.abdelrahman_elshreif.sky_vibe.alarm.view.NotificationPermissionHandler
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +27,8 @@ import java.util.concurrent.TimeUnit
 
 class AlarmViewModel(
     private val repository: SkyVibeRepository,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val locationUtilities: LocationUtilities
 ) : ViewModel() {
 
 
@@ -38,6 +40,7 @@ class AlarmViewModel(
 
     private val _notificationsEnabled = MutableStateFlow(false)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
+
 
 
     init {
