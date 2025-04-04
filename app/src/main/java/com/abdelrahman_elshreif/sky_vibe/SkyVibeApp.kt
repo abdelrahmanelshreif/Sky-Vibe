@@ -43,7 +43,8 @@ class SkyVibeApp : Application() {
             applicationContext,
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
         )
-        notificationManager = WeatherNotificationManager(applicationContext)
+
+        notificationManager = WeatherNotificationManager(this)
         workManager = WorkManager.getInstance(applicationContext)
     }
 
