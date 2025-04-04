@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -23,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.navigation.Screen
@@ -45,7 +48,7 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
     }
     Scaffold(floatingActionButton = {
         FloatingActionButton(onClick = { navController.navigate("add_location") }) {
-            Icon(Icons.Default.Add, contentDescription = "Add Location")
+            Icon(Icons.Default.AddLocationAlt, contentDescription = stringResource(R.string.add_location))
         }
     }) { padding ->
         when {
@@ -66,6 +69,10 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+            }
+
+            uiState.favouriteLocations.isEmpty() -> {
+                EmptyFavouriteScreen()
             }
 
             else -> {

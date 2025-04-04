@@ -100,10 +100,16 @@ class LocationUtilities(private val context: Context) {
         val geocoder = Geocoder(context, Locale.getDefault())
         return try {
             val addresses = geocoder.getFromLocation(lat, lon, 1)
-            addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
+            if (!addresses.isNullOrEmpty()) {
+                val city = addresses[0].locality ?: addresses[0].subAdminArea ?: ""
+                val country = addresses[0].countryName ?: ""
+                "$city, $country".trim().replace("^, ".toRegex(), "")
+            } else "Unknown Location"
         } catch (ex: Exception) {
             "Error fetching address: ${ex.message}"
         }
+
+
     }
 
     private suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
@@ -123,7 +129,7 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    private suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
+    suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
         return context.dataStore.data.map { preferences ->
             val latitude = preferences[LATITUDE]
             val longitude = preferences[LONGITUDE]

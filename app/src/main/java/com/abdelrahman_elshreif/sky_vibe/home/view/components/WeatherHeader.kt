@@ -19,11 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.Utility
 import kotlin.math.roundToInt
 
@@ -35,14 +37,14 @@ fun WeatherHeader(weatherData: WeatherResponse, tempUnit: String) {
     val currentTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.dt)
     val sunriseTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.sunrise)
     val sunsetTime = Utility.DateTimeUtil.convertUnixToDateTime(weatherData.current.sunset)
-    val zone = Utility.TimeZoneUtil.convertTimezoneToCityLocation(weatherData.timezone)
+//    val zone = Utility.TimeZoneUtil.convertTimezoneToCityLocation(weatherData.timezone)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = zone,
+            text = LocationUtilities(LocalContext.current).getAddressFromLocation(weatherData.lat,weatherData.lon),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )

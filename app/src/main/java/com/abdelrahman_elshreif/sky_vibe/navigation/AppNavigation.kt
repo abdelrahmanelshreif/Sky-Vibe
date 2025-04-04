@@ -40,7 +40,7 @@ fun AppNavigation(
         modifier = Modifier.padding(paddingValues)
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(homeViewModel)
+            HomeScreen(homeViewModel,favouriteViewModel)
         }
         composable(Screen.Favourite.route) {
             FavouriteScreen(favouriteViewModel, navController)

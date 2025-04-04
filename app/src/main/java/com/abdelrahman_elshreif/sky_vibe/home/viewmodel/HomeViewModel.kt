@@ -9,6 +9,7 @@ import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.math.log
@@ -41,11 +42,21 @@ class HomeViewModel(
     private val _locationMethod = MutableStateFlow("")
     val locationMethod = _locationMethod.asStateFlow()
 
+    private val _savedLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    val savedLocation = _savedLocation.asStateFlow()
 
 
     init {
         fetchSetting()
         fetchLocation()
+
+        viewModelScope.launch {
+            loadSavedLocation()
+        }
+    }
+
+    private suspend fun loadSavedLocation() {
+        _savedLocation.value = locationUtilities.getLocationFromDataStore()
     }
 
     private fun fetchSetting() {
@@ -79,7 +90,7 @@ class HomeViewModel(
         }
     }
 
-    private fun fetchWeatherData(lat: Double, lon: Double) {
+    fun fetchWeatherData(lat: Double, lon: Double) {
         viewModelScope.launch {
             _isLoading.value = true
 
@@ -124,11 +135,18 @@ class HomeViewModel(
                 }
                 .collect { weatherData ->
                     _homeWeatherData.value = weatherData
+                    locationUtilities.saveLocationFromMapToDataStore(lat, lon)
                 }
             _isLoading.value = false
         }
     }
 
+    fun saveSelectedLocation(lat: Double, lon: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            locationUtilities.saveLocationFromMapToDataStore(lat, lon)
+        }
+
+    }
 
     private fun fetchLocation() {
         viewModelScope.launch {

@@ -58,7 +58,11 @@ import org.osmdroid.views.CustomZoomButtonsController
 fun MapScreen(
     viewModel: FavouriteViewModel,
     navController: NavController,
+    isLocationSelection: Boolean = false,
+    onLocationSelected: ((Double, Double) -> Unit)? = null,
+    locationMethod: String = "map"
 ) {
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -72,7 +76,21 @@ fun MapScreen(
     val mapState by viewModel.uiState.collectAsState()
     val searchBarState by viewModel.searchBarUiState.collectAsState()
 
+
     Box(modifier = Modifier.fillMaxSize()) {
+        if (locationMethod != "gps") {
+            Text(
+                text = stringResource(R.string.tap_to_select_location),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 16.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(8.dp)
+            )
+        }
         MapView(
             state = mapState,
             onMapClicked = { lat, lon ->
@@ -125,13 +143,23 @@ fun MapScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        viewModel.handleMapEvent(MapScreenEvent.OnSaveLocation)
+                        if (isLocationSelection) {
+                            if (onLocationSelected != null) {
+                                onLocationSelected(it.lat, it.lon)
+                            }
+                        } else {
+                            viewModel.handleMapEvent(MapScreenEvent.OnSaveLocation)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.save_location))
+                    Text(
+                        stringResource(
+                            if (isLocationSelection) R.string.confirm_location
+                            else R.string.save_location
+                        )
+                    )
                 }
-
             }
 
 
@@ -142,7 +170,17 @@ fun MapScreen(
                 .align(alignment = BottomEnd)
                 .padding(16.dp)
         )
+        if (locationMethod == "gps") {
+            LocationButton(
+                onClick = { viewModel.handleMapEvent(MapScreenEvent.OnLocateMeButtonPressed) },
+                modifier = Modifier
+                    .align(alignment = BottomEnd)
+                    .padding(16.dp)
+            )
+        }
+
     }
+
 }
 
 @Composable
