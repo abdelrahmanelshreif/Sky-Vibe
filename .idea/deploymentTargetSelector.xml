@@ -4,8 +4,25 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2025-04-04T21:52:10.930053800Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Abdelrahman-Elshreif\.android\avd\Pixel_8_API_35.avd" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="WeatherDetailsCard">
+      <SelectionState runConfigName="disableAlert_isEnabledFalse()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="disableAlert_alertIsEnabledFalse()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="SkyVibeLocalDataSourceTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="WeatherAlertDaoTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

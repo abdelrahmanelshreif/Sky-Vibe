@@ -65,7 +65,7 @@ fun FavouriteScreen(favViewModel: FavouriteViewModel, navController: NavControll
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = uiState.error ?: "Unknown error occurred",
+                        text = uiState.error ?: stringResource(R.string.unknown_error_occurred),
                         color = MaterialTheme.colorScheme.error
                     )
                 }

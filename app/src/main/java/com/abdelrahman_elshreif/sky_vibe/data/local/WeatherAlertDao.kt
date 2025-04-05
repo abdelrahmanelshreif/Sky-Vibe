@@ -24,4 +24,7 @@ interface WeatherAlertDao {
 
     @Delete
     fun deleteAlert(weatherAlert: WeatherAlert)
+
+    @Query("UPDATE alerts SET isEnabled = 0 WHERE id = :alertId")
+    suspend fun disableAlertById(alertId: Long)
 }

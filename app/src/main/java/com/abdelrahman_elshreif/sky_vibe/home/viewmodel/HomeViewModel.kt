@@ -63,10 +63,6 @@ class HomeViewModel(
         }
     }
 
-    suspend fun getSavedLocation(): Pair<Double, Double>? {
-        return locationUtilities.getLocationFromDataStore()
-    }
-
     fun saveSelectedLocationAndFetch(lat: Double, lon: Double) {
         viewModelScope.launch {
             locationUtilities.saveLocationToDataStore(lat, lon)

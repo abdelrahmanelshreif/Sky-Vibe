@@ -3,42 +3,51 @@ package com.abdelrahman_elshreif.sky_vibe.data.local
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-class SkyVibeLocalDataSource(
-    private val favouriteLocationDao: FavouriteLocationDao,
-    private val alertsDao: WeatherAlertDao
-) : ISkyVibeLocalDataSource {
+class FakeSkyVibeLocalDataSource : ISkyVibeLocalDataSource {
+    private val favouriteLocations = mutableListOf<SkyVibeLocation>()
+    private val weatherAlerts = mutableListOf<WeatherAlert>()
 
     override suspend fun getFavouriteLocations(): Flow<List<SkyVibeLocation>> {
-        return favouriteLocationDao.getAllLocations()
+        return flow {
+            emit(favouriteLocations)
+        }
     }
 
     override suspend fun addLocationToFavourite(location: SkyVibeLocation): Long {
-        return favouriteLocationDao.insertLocation(location)
+        favouriteLocations.add(location)
+        return location.hashCode().toLong()
     }
 
     override suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
-        return favouriteLocationDao.deleteLocation(location)
+        favouriteLocations.remove(location)
     }
 
     override suspend fun getAlerts(): Flow<List<WeatherAlert>> {
-        return alertsDao.getAllAlerts()
+        return flow {
+            emit(weatherAlerts)
+        }
     }
 
     override suspend fun addAlert(weatherAlert: WeatherAlert): Long {
-        return alertsDao.insertNewAlert(weatherAlert)
+        weatherAlerts.add(weatherAlert)
+        return weatherAlert.hashCode().toLong()
     }
 
     override suspend fun deleteAlert(weatherAlert: WeatherAlert) {
-        return alertsDao.deleteAlert(weatherAlert)
+        weatherAlerts.remove(weatherAlert)
+
     }
 
     override suspend fun updateAlert(weatherAlert: WeatherAlert) {
-        return alertsDao.updateAlert(weatherAlert)
+        val index = weatherAlerts.indexOfFirst { it.id == weatherAlert.id }
+        if (index != -1) {
+            weatherAlerts[index] = weatherAlert
+        }
     }
 
     override suspend fun disableAlert(alertId: Long) {
-        return alertsDao.disableAlertById(alertId)
+        TODO("Not yet implemented")
     }
-
 }

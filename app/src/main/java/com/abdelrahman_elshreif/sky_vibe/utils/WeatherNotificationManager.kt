@@ -12,20 +12,21 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.alarm.view.AlarmCancelReceiver
 
 class WeatherNotificationManager(private val context: Context) {
 
 
-    fun showNotification(alertId: Long, message: String?) {
+    fun showNotification(alertId: Long, location: String?, weatherFeeling: String) {
         val notificationManager = NotificationManagerCompat.from(context)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.weather_alert)
             .setContentTitle(context.getString(R.string.weather_alert))
-            .setContentText(message ?: "Weather Alert!")
+            .setContentText(
+                "$location \n $weatherFeeling"
+            )
             .setAutoCancel(true)
             .build()
 
@@ -42,12 +43,12 @@ class WeatherNotificationManager(private val context: Context) {
 
 
     @SuppressLint("MissingPermission")
-    fun showAlarmNotification(alertId: Long, message: String?) {
+    fun showAlarmNotification(alertId: Long, location: String?, weatherFeeling: String) {
         val stopIntent = PendingIntent.getBroadcast(
             context,
             alertId.toInt(),
             Intent(context, AlarmCancelReceiver::class.java).apply {
-                action = "${context.packageName}.STOP_ALARM"  // Match manifest action
+                action = "${context.packageName}.STOP_ALARM"
                 putExtra("alertId", alertId)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -56,14 +57,17 @@ class WeatherNotificationManager(private val context: Context) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.weather_alert)
             .setContentTitle(context.getString(R.string.weather_alert))
-            .setContentText(message ?: "Weather Alert!")
+            .setSound(null)
+            .setContentText(
+                "$location \n $weatherFeeling"
+            )
             .setAutoCancel(false)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .addAction(
                 R.drawable.weather_alert,
-                "Stop Alarm",
+                context.getString(R.string.stop_alarm),
                 stopIntent
             )
             .build()
@@ -71,6 +75,7 @@ class WeatherNotificationManager(private val context: Context) {
         NotificationManagerCompat.from(context)
             .notify(alertId.toInt(), notification)
     }
+
     companion object {
         const val CHANNEL_ID = "weather_alerts"
 
