@@ -2,6 +2,7 @@ package com.abdelrahman_elshreif.sky_vibe.data.local
 
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -48,6 +49,14 @@ class FakeSkyVibeLocalDataSource : ISkyVibeLocalDataSource {
     }
 
     override suspend fun disableAlert(alertId: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLastSavedWeather(): WeatherDataEntity? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long {
         TODO("Not yet implemented")
     }
 }

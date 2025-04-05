@@ -1,6 +1,7 @@
 package com.abdelrahman_elshreif.sky_vibe
 
 import android.content.Context
+import android.net.Network
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,6 +31,7 @@ import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.Fa
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModelFactory
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
+import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -59,7 +61,8 @@ class MainActivity : ComponentActivity() {
                 )
             ),
             locationUtilities,
-            SettingDataStore(this)
+            NetworkUtils.getInstance(this),
+            SettingDataStore(this),
         )
         val favouriteFactory = FavouriteViewModelFactory(
             SkyVibeRepository.getInstance(

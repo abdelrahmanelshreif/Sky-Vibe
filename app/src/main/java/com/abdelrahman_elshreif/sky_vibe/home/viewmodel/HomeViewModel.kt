@@ -10,6 +10,7 @@ import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val repository: SkyVibeRepository,
     private val locationUtilities: LocationUtilities,
+    private val networkUtils: NetworkUtils,
     private val settingDataStore: SettingDataStore,
 ) : ViewModel() {
 
@@ -107,7 +109,7 @@ class HomeViewModel(
                 if (it == "english") "en" else "ar"
             } ?: "en"
 
-            if (isNetworkAvailable()) {
+            if (networkUtils.checkNetworkAvailability()) {
                 repository.getWeatherByCoordinates(lat, lon, lang = language)
                     .catch { ex ->
                         _toastEvent.emit(ex.message ?: "Unknown error")
@@ -123,6 +125,7 @@ class HomeViewModel(
                         }
                     }
             } else {
+                _toastEvent.emit("Please connect to network to get latest updates")
                 val weatherDataEntity = repository.getLastSavedWeather()
                 weatherDataEntity?.let {
                     val weatherData = Gson().fromJson(it.jsonData, WeatherResponse::class.java)
@@ -253,7 +256,3 @@ class HomeViewModel(
 
 }
 
-
-private fun isNetworkAvailable(): Boolean {
-    return true
-}

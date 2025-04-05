@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
@@ -54,15 +55,24 @@ fun Context.hasPermission(permission: String): Boolean {
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewModel) {
 
-    val weatherData by homeViewModel.homeWeatherData.collectAsState(null)
-    val isLoading by homeViewModel.isLoading.collectAsState(true)
-    val tempUnit by homeViewModel.tempUnit.collectAsState()
-    val windUnit by homeViewModel.windUnit.collectAsState()
-    val locationMethod by homeViewModel.locationMethod.collectAsState()
-    val savedLocation by homeViewModel.savedLocation.collectAsState(null)
-    val savedAddress by homeViewModel.savedAddress.collectAsState("")
+    val weatherData by homeViewModel.homeWeatherData.collectAsStateWithLifecycle(null)
+    val isLoading by homeViewModel.isLoading.collectAsStateWithLifecycle(true)
+    val tempUnit by homeViewModel.tempUnit.collectAsStateWithLifecycle()
+    val windUnit by homeViewModel.windUnit.collectAsStateWithLifecycle()
+    val locationMethod by homeViewModel.locationMethod.collectAsStateWithLifecycle()
+    val savedLocation by homeViewModel.savedLocation.collectAsStateWithLifecycle(null)
+    val savedAddress by homeViewModel.savedAddress.collectAsStateWithLifecycle("")
     var showLocationSelection by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+
+    LaunchedEffect(Unit) {
+        homeViewModel.toastEvent.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
 
     val permissionLauncher = rememberLauncherForActivityResult(
