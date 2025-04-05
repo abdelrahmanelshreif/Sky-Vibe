@@ -2,23 +2,22 @@ package com.abdelrahman_elshreif.sky_vibe.data.repo
 
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
-import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
-import com.abdelrahman_elshreif.sky_vibe.data.remote.ForecastingRemoteDataSource
+import com.abdelrahman_elshreif.sky_vibe.data.remote.SkyVibeRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 @Suppress("UNCHECKED_CAST")
 class SkyVibeRepository private constructor(
-    private val remoteDataSource: ForecastingRemoteDataSource,
+    private val remoteDataSource: SkyVibeRemoteDataSource,
     private val localDataSource: SkyVibeLocalDataSource,
-) {
+) : ISkyVibeRepository {
     companion object {
         private var repository: SkyVibeRepository? = null
         fun getInstance(
-            remoteDataSource: ForecastingRemoteDataSource,
+            remoteDataSource: SkyVibeRemoteDataSource,
             localDataSource: SkyVibeLocalDataSource
         ): SkyVibeRepository? {
             if (repository == null) {
@@ -28,7 +27,7 @@ class SkyVibeRepository private constructor(
         }
     }
 
-    fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> =
+    override fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> =
         flow {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon)
             emit(response)
@@ -36,7 +35,7 @@ class SkyVibeRepository private constructor(
             emit(null)
         }
 
-    fun getWeatherByCoordinates(lat: Double, lon: Double, lang: String): Flow<WeatherResponse?> =
+    override fun getWeatherByCoordinates(lat: Double, lon: Double, lang: String): Flow<WeatherResponse?> =
         flow {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang)
             emit(response)
@@ -44,7 +43,7 @@ class SkyVibeRepository private constructor(
             emit(null)
         }
 
-    fun getWeatherByCoordinates(
+    override fun getWeatherByCoordinates(
         lat: Double,
         lon: Double,
         lang: String,
@@ -59,37 +58,37 @@ class SkyVibeRepository private constructor(
         }
 
 
-    suspend fun getAllSavedLocations(): Flow<List<SkyVibeLocation>> {
+    override suspend fun getAllSavedLocations(): Flow<List<SkyVibeLocation>> {
         return localDataSource.getFavouriteLocations()
     }
 
-    suspend fun addLocationToFavourite(location: SkyVibeLocation): Long {
+    override suspend fun addLocationToFavourite(location: SkyVibeLocation): Long {
         return localDataSource.addLocationToFavourite(location)
     }
 
-    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
+    override suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
         return localDataSource.deleteLocationFromFavourite(location)
     }
 
-    fun searchLocations(query: String) =
+    override fun searchLocations(query: String) =
         flow {
             val response = remoteDataSource.getSuggestedLocations(query)
             emit(response)
         }
 
-    suspend fun getAlerts(): Flow<List<WeatherAlert>> {
+    override suspend fun getAlerts(): Flow<List<WeatherAlert>> {
         return localDataSource.getAlerts()
     }
 
-    suspend fun addNewAlert(weatherAlert: WeatherAlert): Long {
+    override suspend fun addNewAlert(weatherAlert: WeatherAlert): Long {
         return localDataSource.addAlert(weatherAlert)
     }
 
-    suspend fun deleteAlert(weatherAlert: WeatherAlert) {
+    override suspend fun deleteAlert(weatherAlert: WeatherAlert) {
         return localDataSource.deleteAlert(weatherAlert)
     }
 
-    suspend fun updateAlert(weatherAlert: WeatherAlert) {
+    override suspend fun updateAlert(weatherAlert: WeatherAlert) {
         return localDataSource.updateAlert(weatherAlert)
     }
 

@@ -7,33 +7,33 @@ import kotlinx.coroutines.flow.Flow
 class SkyVibeLocalDataSource(
     private val favouriteLocationDao: FavouriteLocationDao,
     private val alertsDao: WeatherAlertDao
-) {
+) : ISkyVibeLocalDataSource {
 
-    suspend fun getFavouriteLocations(): Flow<List<SkyVibeLocation>> {
+    override suspend fun getFavouriteLocations(): Flow<List<SkyVibeLocation>> {
         return favouriteLocationDao.getAllLocations()
     }
 
-    suspend fun addLocationToFavourite(location: SkyVibeLocation): Long {
+    override suspend fun addLocationToFavourite(location: SkyVibeLocation): Long {
         return favouriteLocationDao.insertLocation(location)
     }
 
-    suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
+    override suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
         return favouriteLocationDao.deleteLocation(location)
     }
 
-    suspend fun getAlerts(): Flow<List<WeatherAlert>> {
+    override suspend fun getAlerts(): Flow<List<WeatherAlert>> {
         return alertsDao.getAllAlerts()
     }
 
-    suspend fun addAlert(weatherAlert: WeatherAlert): Long {
+    override suspend fun addAlert(weatherAlert: WeatherAlert): Long {
         return alertsDao.insertNewAlert(weatherAlert)
     }
 
-    suspend fun deleteAlert(weatherAlert: WeatherAlert) {
+    override suspend fun deleteAlert(weatherAlert: WeatherAlert) {
         return alertsDao.deleteAlert(weatherAlert)
     }
 
-    suspend fun updateAlert(weatherAlert: WeatherAlert) {
+    override suspend fun updateAlert(weatherAlert: WeatherAlert) {
         return alertsDao.updateAlert(weatherAlert)
     }
 
