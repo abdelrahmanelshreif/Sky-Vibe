@@ -30,4 +30,5 @@ interface ISkyVibeRepository {
     suspend fun deleteAlert(weatherAlert: WeatherAlert)
 
     suspend fun updateAlert(weatherAlert: WeatherAlert)
+    suspend fun disableAlert(alertId: Long)
 }

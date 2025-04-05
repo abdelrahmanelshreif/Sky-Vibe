@@ -1,5 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe.alarm.view
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,6 +30,7 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.view.components.NotificationPermi
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.NotificationHelper
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun AlarmScreen(viewModel: AlarmViewModel) {
 
@@ -83,10 +86,19 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
             }
 
             if (showAddDialog) {
-                AddAlertDialog(onDismiss = { viewModel.onEvent(WeatherAlertEvent.OnDismissDialog) },
-                    onSave = { alert ->
-                        viewModel.onEvent(WeatherAlertEvent.OnSaveAlert(alert))
-                    })
+                val location = viewModel.locationOnDemand.value
+                if (location != null) {
+                    AddAlertDialog(
+                        onDismiss = { viewModel.onEvent(WeatherAlertEvent.OnDismissDialog) },
+                        onSave = { alert ->
+                            viewModel.onEvent(WeatherAlertEvent.OnSaveAlert(alert))
+                        },
+                        latitude = location.first,
+                        longitude = location.second
+                    )
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
             }
         }
 

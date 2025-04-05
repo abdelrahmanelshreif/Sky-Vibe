@@ -44,7 +44,9 @@ class WeatherAlertDaoTest {
             endTime = 1709090014,
             type = AlertType.ALARM,
             isEnabled = true,
-            description = "ALERT"
+            description = "ALERT",
+            longitude = 30.0,
+            latitude = 30.0
         )
         alertDao.insertNewAlert(alert)
         val retrievedAlerts = alertDao.getAllAlerts().first()
@@ -66,7 +68,9 @@ class WeatherAlertDaoTest {
             endTime = 1709090014,
             type = AlertType.ALARM,
             isEnabled = true,
-            description = "ALERT"
+            description = "ALERT",
+            longitude = 30.0,
+            latitude = 30.0
         )
         alertDao.insertNewAlert(alert)
         val retrieveAlert = alertDao.getAllAlerts().first()[0]
@@ -87,7 +91,9 @@ class WeatherAlertDaoTest {
             endTime = 2,
             type = AlertType.NOTIFICATION,
             isEnabled = true,
-            description = "Desc1"
+            description = "Desc1",
+            longitude = 30.0,
+            latitude = 30.0
         )
         val alert2 = WeatherAlert(
             alertArea = "Area 2",
@@ -95,7 +101,9 @@ class WeatherAlertDaoTest {
             endTime = 4,
             type = AlertType.ALARM,
             isEnabled = false,
-            description = "Desc2"
+            description = "Desc2",
+            longitude = 30.0,
+            latitude = 30.0
         )
 
         alertDao.insertNewAlert(alert1)
@@ -114,7 +122,9 @@ class WeatherAlertDaoTest {
             endTime = 1709002222,
             type = AlertType.NOTIFICATION,
             isEnabled = false,
-            description = "Old Desc"
+            description = "Old Desc",
+            longitude = 30.0,
+            latitude = 30.0
         )
 
         val id = alertDao.insertNewAlert(alert)
@@ -135,7 +145,9 @@ class WeatherAlertDaoTest {
             endTime = 0,
             type = AlertType.ALARM,
             isEnabled = false,
-            description = "none"
+            description = "none",
+            longitude = 30.0,
+            latitude = 30.0
         )
 
         alertDao.deleteAlert(alert)

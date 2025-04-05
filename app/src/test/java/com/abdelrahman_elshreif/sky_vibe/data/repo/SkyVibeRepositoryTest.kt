@@ -131,7 +131,9 @@ class SkyVibeRepositoryTest {
             endTime = 1709090014,
             type = AlertType.NOTIFICATION,
             isEnabled = true,
-            description = "Test Alert"
+            description = "Test Alert",
+            longitude = 30.0,
+            latitude = 30.0
         )
 
         repository.addNewAlert(alert)
@@ -149,7 +151,9 @@ class SkyVibeRepositoryTest {
             endTime = 1709090014,
             type = AlertType.NOTIFICATION,
             isEnabled = true,
-            description = "Test Alert"
+            description = "Test Alert",
+            longitude = 30.0,
+            latitude = 30.0
         )
         repository.addNewAlert(alert)
         repository.deleteAlert(alert)
@@ -166,7 +170,9 @@ class SkyVibeRepositoryTest {
             endTime = 1709090014,
             type = AlertType.NOTIFICATION,
             isEnabled = false,
-            description = "Original Alert"
+            description = "Original Alert",
+            longitude = 30.0,
+            latitude = 30.0
         )
         repository.addNewAlert(alert)
 

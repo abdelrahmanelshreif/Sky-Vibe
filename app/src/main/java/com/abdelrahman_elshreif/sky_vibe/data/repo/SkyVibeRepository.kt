@@ -94,4 +94,8 @@ class SkyVibeRepository private constructor(
         return localDataSource.updateAlert(weatherAlert)
     }
 
+    override suspend fun disableAlert(alertId: Long ) {
+        return localDataSource.disableAlert(alertId)
+    }
+
 }

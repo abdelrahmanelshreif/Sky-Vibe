@@ -10,11 +10,13 @@ import androidx.work.workDataOf
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
-import com.abdelrahman_elshreif.sky_vibe.workers.WeatherAlertWorker
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.workers.WeatherAlertWorker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
@@ -38,7 +40,8 @@ class AlarmViewModel(
     private val _notificationsEnabled = MutableStateFlow(false)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
-
+    private val _locationOnDemand = MutableStateFlow<Pair<Double, Double>?>(null)
+    val locationOnDemand = _locationOnDemand.asStateFlow()
 
     init {
         loadAlerts()
@@ -58,7 +61,8 @@ class AlarmViewModel(
     fun onEvent(event: WeatherAlertEvent) {
         when (event) {
             is WeatherAlertEvent.OnAddAlertClick -> {
-                _showAddDialog.value = true
+                getLocationForAlert()
+
             }
 
             is WeatherAlertEvent.OnAlertDeleted -> {
@@ -76,6 +80,14 @@ class AlarmViewModel(
             is WeatherAlertEvent.OnSaveAlert -> {
                 saveAlert(event.alert)
             }
+
+        }
+    }
+
+    private fun getLocationForAlert() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _locationOnDemand.value = locationUtilities.getOrFetchLocation()
+            _showAddDialog.value = true
         }
     }
 
@@ -84,7 +96,7 @@ class AlarmViewModel(
 
             try {
                 val loc = locationUtilities.getLocationFromDataStore()
-                alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first,loc.second)
+                alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first, loc.second)
                 repository.addNewAlert(alert)
 
                 scheduleAlert(alert)
@@ -110,17 +122,19 @@ class AlarmViewModel(
         Log.d("ALARM", "Alert time: ${Date(alert.startTime)}")
         Log.d("ALARM", "Delay: $delayTime ms")
 
-        if (delayTime < 10000) {
+        if (delayTime < 3000) {
             Log.d("ALARM", "Alert time is too close or in past, adding to immediate queue")
             return
         }
-
         val endTime = alert.endTime
+
         val inputData = workDataOf(
             "alertId" to alert.id,
             "alertType" to alert.type.name,
             "message" to alert.description,
-            "endTime" to endTime
+            "endTime" to endTime,
+            "latitude" to alert.latitude,
+            "longitude" to alert.longitude
         )
 
         val alertWork = OneTimeWorkRequestBuilder<WeatherAlertWorker>()

@@ -46,4 +46,8 @@ class FakeSkyVibeLocalDataSource : ISkyVibeLocalDataSource {
             weatherAlerts[index] = weatherAlert
         }
     }
+
+    override suspend fun disableAlert(alertId: Long) {
+        TODO("Not yet implemented")
+    }
 }

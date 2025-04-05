@@ -71,4 +71,10 @@
     <string name="ok">نعم</string>
     <string name="are_you_sure_you_want_to_delete_this_alert">هل أنت متأكد أنك تريد حذف هذا التنبيه؟</string>
     <string name="unknown_error_occurred">حدث خطأ غير معروف</string>
+    <string name="stop_alarm">إيقاف الإنذار</string>
+    <string name="end_time">وقت النهاية</string>
+    <string name="alert_type">نوع التنبيه</string>
+    <string name="save">حفظ</string>
+    <string name="add_weather_alert">إضافة تنبيه الطقس</string>
+    <string name="start_time">وقت البدء</string>
 </resources>

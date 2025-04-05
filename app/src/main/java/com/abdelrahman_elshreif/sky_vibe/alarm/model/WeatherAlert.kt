@@ -11,9 +11,13 @@ data class WeatherAlert(
     val startTime: Long,
     val endTime: Long,
     val type: AlertType,
+    val latitude: Double,
+    val longitude: Double,
     val isEnabled: Boolean = true,
     val description: String = ""
-)
+) {
+
+}
 
 
 enum class AlertType {

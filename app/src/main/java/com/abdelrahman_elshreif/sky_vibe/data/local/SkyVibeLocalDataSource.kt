@@ -37,4 +37,8 @@ class SkyVibeLocalDataSource(
         return alertsDao.updateAlert(weatherAlert)
     }
 
+    override suspend fun disableAlert(alertId: Long) {
+        return alertsDao.disableAlertById(alertId)
+    }
+
 }
