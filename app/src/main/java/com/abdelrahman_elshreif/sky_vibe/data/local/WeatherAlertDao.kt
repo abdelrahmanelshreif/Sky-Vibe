@@ -24,4 +24,6 @@ interface WeatherAlertDao {
 
     @Delete
     fun deleteAlert(weatherAlert: WeatherAlert)
+
+
 }
