@@ -10,7 +10,7 @@ import androidx.work.workDataOf
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
-import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertWorker
+import com.abdelrahman_elshreif.sky_vibe.workers.WeatherAlertWorker
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.Dispatchers

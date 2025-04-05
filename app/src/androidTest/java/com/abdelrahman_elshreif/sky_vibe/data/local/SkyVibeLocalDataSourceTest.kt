@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
@@ -20,7 +21,7 @@ import org.junit.runner.RunWith
 
 
 @RunWith(AndroidJUnit4::class)
-@SmallTest
+@MediumTest
 class SkyVibeLocalDataSourceTest {
     private lateinit var skyVibeDatabase: SkyVibeDatabase
     private lateinit var skyVibeLocalDataSource: SkyVibeLocalDataSource

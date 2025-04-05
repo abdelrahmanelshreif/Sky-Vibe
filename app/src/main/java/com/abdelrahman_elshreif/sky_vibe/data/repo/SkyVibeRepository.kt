@@ -1,9 +1,11 @@
 package com.abdelrahman_elshreif.sky_vibe.data.repo
 
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
+import com.abdelrahman_elshreif.sky_vibe.data.local.ISkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.data.remote.ISkyVibeRemoteDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.remote.SkyVibeRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -11,14 +13,14 @@ import kotlinx.coroutines.flow.flow
 
 @Suppress("UNCHECKED_CAST")
 class SkyVibeRepository private constructor(
-    private val remoteDataSource: SkyVibeRemoteDataSource,
-    private val localDataSource: SkyVibeLocalDataSource,
+    private val remoteDataSource: ISkyVibeRemoteDataSource,
+    private val localDataSource: ISkyVibeLocalDataSource,
 ) : ISkyVibeRepository {
     companion object {
-        private var repository: SkyVibeRepository? = null
+        var repository: SkyVibeRepository? = null
         fun getInstance(
-            remoteDataSource: SkyVibeRemoteDataSource,
-            localDataSource: SkyVibeLocalDataSource
+            remoteDataSource: ISkyVibeRemoteDataSource,
+            localDataSource: ISkyVibeLocalDataSource
         ): SkyVibeRepository? {
             if (repository == null) {
                 repository = SkyVibeRepository(remoteDataSource, localDataSource)

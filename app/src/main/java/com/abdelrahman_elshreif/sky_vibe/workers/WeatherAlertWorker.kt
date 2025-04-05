@@ -1,13 +1,11 @@
-package com.abdelrahman_elshreif.sky_vibe.alarm.model
+package com.abdelrahman_elshreif.sky_vibe.workers
 
 import android.content.Context
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.abdelrahman_elshreif.sky_vibe.R
+import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherAlarmPlayer
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import kotlinx.coroutines.CancellationException
