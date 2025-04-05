@@ -44,6 +44,8 @@ class FavouriteViewModel(
     private val _navigationEvent = MutableSharedFlow<MapScreenNavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
 
     private val _searchQuery = MutableStateFlow("")
 
@@ -230,6 +232,12 @@ class FavouriteViewModel(
     fun removeFavouritePlace(location: SkyVibeLocation) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteLocationFromFavourite(location)
+        }
+    }
+
+    fun handleNetworkFailure() {
+        viewModelScope.launch {
+            _toastEvent.emit("Please connect to network to add new location")
         }
     }
 

@@ -29,6 +29,7 @@ import com.abdelrahman_elshreif.sky_vibe.navigation.AppNavigation
 import com.abdelrahman_elshreif.sky_vibe.navigation.getNavigationItems
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
 import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
@@ -56,7 +57,8 @@ fun SkyVibeApp(
     favouriteViewModel: FavouriteViewModel,
     favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
     alarmViewModel: AlarmViewModel,
-    locationUtilities: LocationUtilities
+    locationUtilities: LocationUtilities,
+    networkUtils:NetworkUtils
 ) {
     val navController = rememberNavController()
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
@@ -104,7 +106,8 @@ fun SkyVibeApp(
                     favWeatherDetailViewModel,
                     alarmViewModel,
                     paddingValues,
-                    navController
+                    navController,
+                    networkUtils
                 )
             }
         )

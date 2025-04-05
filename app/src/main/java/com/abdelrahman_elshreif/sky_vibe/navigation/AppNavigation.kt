@@ -22,6 +22,7 @@ import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.map.view.MapScreen
 import com.abdelrahman_elshreif.sky_vibe.settings.view.SettingScreen
 import com.abdelrahman_elshreif.sky_vibe.settings.viewmodel.SettingViewModel
+import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -32,7 +33,8 @@ fun AppNavigation(
     favWeatherDetailViewModel: FavouriteWeatherDetailsViewModel,
     alarmViewModel:AlarmViewModel,
     paddingValues: PaddingValues,
-    navController: NavHostController
+    navController: NavHostController,
+    networkUtils: NetworkUtils
 ) {
     NavHost(
         navController = navController,
@@ -43,7 +45,7 @@ fun AppNavigation(
             HomeScreen(homeViewModel,favouriteViewModel)
         }
         composable(Screen.Favourite.route) {
-            FavouriteScreen(favouriteViewModel, navController)
+            FavouriteScreen(favouriteViewModel, navController, networkUtils )
         }
         composable(Screen.Alarm.route) {
             AlarmScreen(alarmViewModel)
@@ -52,7 +54,7 @@ fun AppNavigation(
             SettingScreen(settingViewModel)
         }
 
-        composable("add_location") {
+        composable(Screen.Map.route) {
             MapScreen(viewModel = favouriteViewModel, navController)
         }
 

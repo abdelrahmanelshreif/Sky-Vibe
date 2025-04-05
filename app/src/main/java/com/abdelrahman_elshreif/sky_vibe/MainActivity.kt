@@ -1,7 +1,6 @@
 package com.abdelrahman_elshreif.sky_vibe
 
 import android.content.Context
-import android.net.Network
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -49,6 +48,7 @@ class MainActivity : ComponentActivity() {
             delay(2000)
             splashScreenVisible.value = false
         }
+        val networkUtils = NetworkUtils.getInstance(this)
         // initializing ViewModels
         locationUtilities = LocationUtilities(this)
         val homeFactory = HomeViewModelFactory(
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 )
             ),
             locationUtilities,
-            NetworkUtils.getInstance(this),
+            networkUtils,
             SettingDataStore(this),
         )
         val favouriteFactory = FavouriteViewModelFactory(
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                     SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
-            locationUtilities
+            locationUtilities,
         )
 
         val favWeatherDetailFactory = FavouriteWeatherDetailsViewModelFactory(
@@ -119,7 +119,8 @@ class MainActivity : ComponentActivity() {
                 favouriteViewModel,
                 favWeatherDetailViewModel,
                 alarmViewModel,
-                locationUtilities = locationUtilities
+                locationUtilities = locationUtilities,
+                networkUtils = networkUtils
             )
         }
     }

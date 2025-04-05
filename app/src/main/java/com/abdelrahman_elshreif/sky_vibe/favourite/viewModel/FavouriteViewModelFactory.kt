@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
 
 
 @Suppress("UNCHECKED_CAST")
