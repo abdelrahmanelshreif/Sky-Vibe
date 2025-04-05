@@ -2,11 +2,10 @@ package com.abdelrahman_elshreif.sky_vibe.data.repo
 
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.local.ISkyVibeLocalDataSource
-import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.data.remote.ISkyVibeRemoteDataSource
-import com.abdelrahman_elshreif.sky_vibe.data.remote.SkyVibeRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -37,7 +36,11 @@ class SkyVibeRepository private constructor(
             emit(null)
         }
 
-    override fun getWeatherByCoordinates(lat: Double, lon: Double, lang: String): Flow<WeatherResponse?> =
+    override fun getWeatherByCoordinates(
+        lat: Double,
+        lon: Double,
+        lang: String
+    ): Flow<WeatherResponse?> =
         flow {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang)
             emit(response)
@@ -94,8 +97,17 @@ class SkyVibeRepository private constructor(
         return localDataSource.updateAlert(weatherAlert)
     }
 
-    override suspend fun disableAlert(alertId: Long ) {
+    override suspend fun disableAlert(alertId: Long) {
         return localDataSource.disableAlert(alertId)
+    }
+
+    override suspend fun getLastSavedWeather(): WeatherDataEntity? {
+        return localDataSource.getLastSavedWeather()
+    }
+
+    override suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long {
+        return localDataSource.insertWeatherData(weatherData)
+
     }
 
 }

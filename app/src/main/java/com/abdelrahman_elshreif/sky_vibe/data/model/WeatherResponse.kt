@@ -1,8 +1,11 @@
 package com.abdelrahman_elshreif.sky_vibe.data.model
 
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class WeatherResponse(
+    @PrimaryKey
+    val id: Int = 0,
     @SerializedName("lat")
     val lat: Double,
     @SerializedName("lon")

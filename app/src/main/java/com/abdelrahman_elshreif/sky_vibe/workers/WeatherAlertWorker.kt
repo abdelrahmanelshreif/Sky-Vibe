@@ -35,7 +35,8 @@ class WeatherAlertWorker(
         ),
         SkyVibeLocalDataSource(
             SkyVibeDatabase.getInstance(context).getFavouriteLocationDao(),
-            SkyVibeDatabase.getInstance(context).getAlertsDao()
+            SkyVibeDatabase.getInstance(context).getAlertsDao(),
+            SkyVibeDatabase.getInstance(context).getWeathersDao()
         )
     )
     private val locationUtilities = LocationUtilities(context)

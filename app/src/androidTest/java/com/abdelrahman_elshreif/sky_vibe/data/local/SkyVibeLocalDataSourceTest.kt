@@ -36,7 +36,9 @@ class SkyVibeLocalDataSourceTest {
 
         skyVibeLocalDataSource = SkyVibeLocalDataSource(
             skyVibeDatabase.getFavouriteLocationDao(),
-            skyVibeDatabase.getAlertsDao()
+            skyVibeDatabase.getAlertsDao(),
+            skyVibeDatabase.getWeathersDao(),
+
         )
     }
 

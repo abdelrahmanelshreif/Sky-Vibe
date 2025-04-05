@@ -54,7 +54,8 @@ class MainActivity : ComponentActivity() {
                 SkyVibeRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
-                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                    SkyVibeDatabase.getInstance(this).getAlertsDao(),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             locationUtilities,
@@ -65,7 +66,8 @@ class MainActivity : ComponentActivity() {
                 SkyVibeRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
-                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                    SkyVibeDatabase.getInstance(this).getAlertsDao(),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             locationUtilities
@@ -76,7 +78,8 @@ class MainActivity : ComponentActivity() {
                 SkyVibeRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
-                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                    SkyVibeDatabase.getInstance(this).getAlertsDao(),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             locationUtilities, SettingDataStore(this)
@@ -86,7 +89,8 @@ class MainActivity : ComponentActivity() {
                 SkyVibeRemoteDataSource(RetrofitHelper.apiservice, OSMHelper.apiService),
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
-                    SkyVibeDatabase.getInstance(this).getAlertsDao()
+                    SkyVibeDatabase.getInstance(this).getAlertsDao(),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             WorkManager.getInstance(this),

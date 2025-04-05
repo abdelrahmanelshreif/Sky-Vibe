@@ -6,16 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
-
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 
 @Database(
-    entities = [SkyVibeLocation::class, WeatherAlert::class],
+    entities = [SkyVibeLocation::class, WeatherAlert::class, WeatherDataEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class SkyVibeDatabase : RoomDatabase() {
     abstract fun getFavouriteLocationDao(): FavouriteLocationDao
     abstract fun getAlertsDao(): WeatherAlertDao
+    abstract fun getWeathersDao(): WeatherDao
 
     companion object {
         @Volatile
