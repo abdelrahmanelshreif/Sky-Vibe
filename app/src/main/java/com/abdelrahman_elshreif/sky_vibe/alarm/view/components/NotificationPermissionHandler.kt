@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.abdelrahman_elshreif.sky_vibe.R
 
 @Composable
 fun NotificationPermissionHandler(
@@ -27,7 +28,7 @@ fun NotificationPermissionHandler(
             onPermissionDenied()
             Toast.makeText(
                 context,
-                "Notification permission is required for alerts",
+                context.getString(R.string.notification_permission_is_required_for_alerts),
                 Toast.LENGTH_SHORT
             ).show()
         }

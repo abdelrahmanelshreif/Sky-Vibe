@@ -24,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.abdelrahman_elshreif.sky_vibe.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -107,7 +109,7 @@ fun DateTimePicker(
                             TextButton(
                                 onClick = { showTimePicker = false }
                             ) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.cancel))
                             }
                             TextButton(
                                 onClick = {
@@ -120,7 +122,7 @@ fun DateTimePicker(
                                     showTimePicker = false
                                 }
                             ) {
-                                Text("OK")
+                                Text(stringResource(R.string.ok))
                             }
                         }
                     }
