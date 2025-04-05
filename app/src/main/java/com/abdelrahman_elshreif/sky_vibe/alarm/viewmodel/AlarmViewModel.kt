@@ -98,9 +98,7 @@ class AlarmViewModel(
                 val loc = locationUtilities.getLocationFromDataStore()
                 alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first, loc.second)
                 repository.addNewAlert(alert)
-
                 scheduleAlert(alert)
-
                 _showAddDialog.value = false
 
             } catch (e: Exception) {

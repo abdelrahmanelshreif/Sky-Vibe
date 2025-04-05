@@ -154,4 +154,29 @@ class SkyVibeLocalDataSourceTest {
         assertThat(retrievedAlerts[0].isEnabled, `is`(true))
     }
 
+
+    @Test
+    fun disableAlert_alertIsEnabledFalse() = runTest {
+        val alert = WeatherAlert(
+            alertArea = "Giza, Egypt",
+            startTime = 1708090090,
+            endTime = 1709090014,
+            type = AlertType.ALARM,
+            isEnabled = true,
+            description = "Original Alert",
+            longitude = 30.0,
+            latitude = 30.0
+        )
+
+        val id = skyVibeLocalDataSource.addAlert(alert)
+
+        skyVibeLocalDataSource.disableAlert(alertId = id)
+
+
+        val retrievedAlerts = skyVibeLocalDataSource.getAlerts().first()
+        assertThat(retrievedAlerts[0].isEnabled, `is`(false))
+    }
+
+
+
 }

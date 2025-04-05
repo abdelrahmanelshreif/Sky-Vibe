@@ -155,4 +155,22 @@ class WeatherAlertDaoTest {
         assertTrue(alerts.isEmpty())
     }
 
+    @Test
+    fun disableAlert_isEnabledFalse() = runTest {
+        val alert = WeatherAlert(
+            id = 99,
+            alertArea = "None",
+            startTime = 0,
+            endTime = 0,
+            type = AlertType.ALARM,
+            isEnabled = true,
+            description = "none",
+            longitude = 30.0,
+            latitude = 30.0
+        )
+        alertDao.insertNewAlert(alert)
+        alertDao.disableAlertById(alert.id)
+        val retrieveAlert = alertDao.getAllAlerts().first()[0]
+        assertThat(retrieveAlert.isEnabled, `is`(false))
+    }
 }
