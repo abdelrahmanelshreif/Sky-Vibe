@@ -14,6 +14,7 @@ import androidx.compose.ui.window.Dialog
 import com.abdelrahman_elshreif.sky_vibe.R
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
+import com.abdelrahman_elshreif.sky_vibe.alarm.model.toLocalizedStringRes
 
 @SuppressLint("AutoboxingStateCreation")
 @Composable
@@ -74,7 +75,7 @@ fun AddAlertDialog(
                             FilterChip(
                                 selected = alertType == type,
                                 onClick = { alertType = type },
-                                label = { Text(type.name) }
+                                label = { Text(stringResource(id = type.toLocalizedStringRes()))  }
                             )
                         }
                     }
@@ -120,3 +121,5 @@ fun AddAlertDialog(
         }
     }
 }
+
+
