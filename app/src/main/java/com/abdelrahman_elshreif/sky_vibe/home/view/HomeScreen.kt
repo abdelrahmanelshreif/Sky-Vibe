@@ -53,7 +53,7 @@ fun Context.hasPermission(permission: String): Boolean {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewModel) {
+fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewModel ) {
 
     val weatherData by homeViewModel.homeWeatherData.collectAsStateWithLifecycle(null)
     val isLoading by homeViewModel.isLoading.collectAsStateWithLifecycle(true)
@@ -65,13 +65,11 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
     var showLocationSelection by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-
     LaunchedEffect(Unit) {
         homeViewModel.toastEvent.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
-
 
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
 
@@ -106,6 +104,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                     homeViewModel.fetchLocationAndWeather()
                 }
             }
+
             "map" -> {
                 if (savedLocation == null) {
                     showLocationSelection = true
@@ -156,6 +155,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                         windUnit = windUnit,
                         address = savedAddress
                     )
+
                     else -> ErrorState()
                 }
             }
