@@ -233,11 +233,4 @@ class FavouriteViewModel(
         }
     }
 
-    fun getFavouriteLocation() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getAllSavedLocations()
-        }
-    }
-
-
 }

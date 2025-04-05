@@ -14,9 +14,7 @@ import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.workers.WeatherAlertWorker
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
@@ -97,8 +95,11 @@ class AlarmViewModel(
             try {
                 val loc = locationUtilities.getLocationFromDataStore()
                 alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first, loc.second)
-                repository.addNewAlert(alert)
-                scheduleAlert(alert)
+
+                val alertId = repository.addNewAlert(alert)
+                val alertWithId = alert.copy(id = alertId)
+                scheduleAlert(alertWithId)
+
                 _showAddDialog.value = false
 
             } catch (e: Exception) {
