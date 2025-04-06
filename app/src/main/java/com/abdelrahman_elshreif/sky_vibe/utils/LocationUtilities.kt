@@ -26,9 +26,30 @@ import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+interface ILocationUtilities {
+    @SuppressLint("MissingPermission")
+    suspend fun getFreshLocation(): Location?
+
+    suspend fun getOrFetchLocation(): Pair<Double, Double>?
+    fun checkLocationAvailability(): Boolean
+    fun checkPermissions(): Boolean
+    fun isLocationEnabled(): Boolean
+
+    suspend fun getAddressFromLocation(lat: Double, lon: Double): String
+
+    suspend fun fetchLocationAndAddress(): Pair<Location?, String>
+
+    suspend fun getLocationFromDataStore(): Pair<Double, Double>?
+
+    suspend fun clearLocationFromSharedPrefs()
+
+    suspend fun saveLocationToDataStore(latitude: Double, longitude: Double)
+}
+
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "location_prefs")
 
-class LocationUtilities(private val context: Context) {
+class LocationUtilities(private val context: Context) : ILocationUtilities {
 
     private val fusedClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -37,9 +58,10 @@ class LocationUtilities(private val context: Context) {
     private val ADDRESS = stringPreferencesKey("address")
 
     @SuppressLint("MissingPermission")
-    suspend fun getFreshLocation(): Location? {
+    override suspend fun getFreshLocation(): Location? {
         return suspendCancellableCoroutine { continuation ->
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L).build()
+            val locationRequest =
+                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L).build()
 
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult) {
@@ -62,7 +84,7 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    suspend fun getOrFetchLocation(): Pair<Double, Double>? {
+    override suspend fun getOrFetchLocation(): Pair<Double, Double>? {
         return if (checkPermissions() && isLocationEnabled()) {
             fetchLocationAndAddress().let { (location, _) ->
                 location?.let {
@@ -75,11 +97,11 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    private fun checkLocationAvailability(): Boolean {
+    override fun checkLocationAvailability(): Boolean {
         return checkPermissions() && isLocationEnabled()
     }
 
-    private fun checkPermissions(): Boolean {
+    override fun checkPermissions(): Boolean {
         return (ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(
@@ -87,14 +109,14 @@ class LocationUtilities(private val context: Context) {
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
-    private fun isLocationEnabled(): Boolean {
+    override fun isLocationEnabled(): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
             LocationManager.NETWORK_PROVIDER
         )
     }
 
-    suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
+    override suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
         return withContext(Dispatchers.IO) {
             val geocoder = Geocoder(context, Locale.getDefault())
             try {
@@ -110,7 +132,7 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    private suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
+    override suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
         return try {
             if (!checkLocationAvailability()) {
                 return Pair(null, "Location not available")
@@ -127,7 +149,7 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
+    override suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
         return context.dataStore.data.map { preferences ->
             val latitude = preferences[LATITUDE]
             val longitude = preferences[LONGITUDE]
@@ -139,14 +161,14 @@ class LocationUtilities(private val context: Context) {
         }.firstOrNull()
     }
 
-    suspend fun clearLocationFromSharedPrefs() {
+    override suspend fun clearLocationFromSharedPrefs() {
         context.dataStore.edit { preferences ->
             preferences.remove(LATITUDE)
             preferences.remove(LONGITUDE)
         }
     }
 
-     suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
+    override suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
         context.dataStore.edit { preferences ->
             preferences[LATITUDE] = latitude
             preferences[LONGITUDE] = longitude

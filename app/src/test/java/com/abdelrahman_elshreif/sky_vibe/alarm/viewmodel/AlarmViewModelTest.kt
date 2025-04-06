@@ -2,6 +2,7 @@ package com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel
 
 import androidx.work.WorkManager
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.utils.AlertScheduler
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import io.mockk.mockk
 import junit.framework.Assert.assertFalse
@@ -15,15 +16,13 @@ class AlarmViewModelTest {
 
     private lateinit var viewModel: AlarmViewModel
     private lateinit var repository: SkyVibeRepository
-    private lateinit var locationUtilities: LocationUtilities
-    private lateinit var workManager: WorkManager
+    private lateinit var alertScheduler: AlertScheduler
 
     @Before
     fun setUp() {
         repository = mockk(relaxed = true)
-        workManager = mockk(relaxed = true)
-        locationUtilities = mockk(relaxed = true)
-        viewModel = AlarmViewModel(repository, workManager, locationUtilities)
+        alertScheduler = mockk(relaxed = true)
+        viewModel = AlarmViewModel(repository, alertScheduler)
     }
 
     @Test

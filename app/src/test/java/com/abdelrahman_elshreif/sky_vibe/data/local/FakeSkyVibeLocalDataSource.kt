@@ -59,4 +59,12 @@ class FakeSkyVibeLocalDataSource : ISkyVibeLocalDataSource {
     override suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSavedLocation(): Pair<Double, Double>? {
+        TODO("Not yet implemented")
+    }
 }

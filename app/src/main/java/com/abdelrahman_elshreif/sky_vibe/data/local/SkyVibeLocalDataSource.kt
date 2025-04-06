@@ -4,6 +4,7 @@ import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
+import com.abdelrahman_elshreif.sky_vibe.utils.ILocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +12,7 @@ class SkyVibeLocalDataSource(
     private val favouriteLocationDao: FavouriteLocationDao,
     private val alertsDao: WeatherAlertDao,
     private val weatherDao: WeatherDao,
-    private val locationUtilities: LocationUtilities
+    private val locationUtilities: ILocationUtilities
 ) : ISkyVibeLocalDataSource {
 
     override suspend fun getFavouriteLocations(): Flow<List<SkyVibeLocation>> {

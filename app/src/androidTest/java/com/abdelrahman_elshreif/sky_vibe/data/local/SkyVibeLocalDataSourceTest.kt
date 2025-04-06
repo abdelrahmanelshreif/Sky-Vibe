@@ -9,6 +9,8 @@ import androidx.test.filters.SmallTest
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
+import com.abdelrahman_elshreif.sky_vibe.utils.FakeLocationUtilities
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -38,6 +40,7 @@ class SkyVibeLocalDataSourceTest {
             skyVibeDatabase.getFavouriteLocationDao(),
             skyVibeDatabase.getAlertsDao(),
             skyVibeDatabase.getWeathersDao(),
+            FakeLocationUtilities()
 
         )
     }
