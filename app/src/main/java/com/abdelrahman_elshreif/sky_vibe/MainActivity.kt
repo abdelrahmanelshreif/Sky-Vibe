@@ -23,7 +23,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkManager
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModel
 import com.abdelrahman_elshreif.sky_vibe.alarm.viewmodel.AlarmViewModelFactory
-import com.abdelrahman_elshreif.sky_vibe.data.local.LocationDataStore
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeDatabase
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMHelper
 import com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel.FavouriteWeatherDetailsViewModel
@@ -58,12 +57,12 @@ class MainActivity : ComponentActivity() {
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
                     SkyVibeDatabase.getInstance(this).getAlertsDao(),
-                    SkyVibeDatabase.getInstance(this).getWeathersDao(),
-                    locationDataStore = LocationDataStore(this),
-                    settingDataStore = SettingDataStore(this),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
-            networkUtils
+            locationUtilities,
+            networkUtils,
+            SettingDataStore(this),
         )
         val favouriteFactory = FavouriteViewModelFactory(
             SkyVibeRepository.getInstance(
@@ -71,9 +70,7 @@ class MainActivity : ComponentActivity() {
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
                     SkyVibeDatabase.getInstance(this).getAlertsDao(),
-                    SkyVibeDatabase.getInstance(this).getWeathersDao(),
-                    locationDataStore = LocationDataStore(this),
-                    settingDataStore = SettingDataStore(this),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             locationUtilities,
@@ -85,9 +82,7 @@ class MainActivity : ComponentActivity() {
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
                     SkyVibeDatabase.getInstance(this).getAlertsDao(),
-                    SkyVibeDatabase.getInstance(this).getWeathersDao(),
-                    locationDataStore = LocationDataStore(this),
-                    settingDataStore = SettingDataStore(this)
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
             locationUtilities, SettingDataStore(this)
@@ -98,12 +93,11 @@ class MainActivity : ComponentActivity() {
                 SkyVibeLocalDataSource(
                     SkyVibeDatabase.getInstance(this).getFavouriteLocationDao(),
                     SkyVibeDatabase.getInstance(this).getAlertsDao(),
-                    SkyVibeDatabase.getInstance(this).getWeathersDao(),
-                    locationDataStore = LocationDataStore(this),
-                    settingDataStore = SettingDataStore(this),
+                    SkyVibeDatabase.getInstance(this).getWeathersDao()
                 )
             ),
-            WorkManager.getInstance(this)
+            WorkManager.getInstance(this),
+            locationUtilities,
         )
         val settingFactory = SettingViewModelFactory(SettingDataStore(this))
         val settingViewModel: SettingViewModel by viewModels { settingFactory }

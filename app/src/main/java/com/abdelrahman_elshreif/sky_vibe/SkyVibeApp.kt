@@ -107,8 +107,7 @@ fun SkyVibeApp(
                     alarmViewModel,
                     paddingValues,
                     navController,
-                    networkUtils,
-                    locationUtilities
+                    networkUtils
                 )
             }
         )
