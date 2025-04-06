@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "setting_prefs")
 
-class SettingDataStore(private val context: Context) {
+class SettingDataStore(private val context: Context) : ISettingsDataSource {
 
     companion object {
         val TEMP_UNIT_KEY = stringPreferencesKey("temp_unit")
@@ -30,37 +30,37 @@ class SettingDataStore(private val context: Context) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
 
-    val tempUnit: Flow<String> = context.dataStore.data.map {
+    override val tempUnit: Flow<String> = context.dataStore.data.map {
         it[TEMP_UNIT_KEY] ?: SettingOption.CELSIUS.storedValue
     }
 
-    val windSpeedUnit: Flow<String> = context.dataStore.data.map {
+    override val windSpeedUnit: Flow<String> = context.dataStore.data.map {
         it[WIND_UNIT_KEY] ?: SettingOption.METER_SEC.storedValue
     }
 
-    val language: Flow<String> = context.dataStore.data.map {
+    override val language: Flow<String> = context.dataStore.data.map {
         it[LANGUAGE_KEY] ?: SettingOption.ENGLISH.storedValue
     }
 
-    val locationMethod: Flow<String> = context.dataStore.data.map {
+    override val locationMethod: Flow<String> = context.dataStore.data.map {
         it[LOCATION_METHOD_KEY] ?: SettingOption.GPS.storedValue
     }
 
-    suspend fun saveTempUnit(resourceId: Int) {
+    override suspend fun saveTempUnit(resourceId: Int) {
         val storedValue = SettingOption.fromResourceId(resourceId)
         context.dataStore.edit { pref ->
             pref[TEMP_UNIT_KEY] = storedValue
         }
     }
 
-    suspend fun saveWindSpeedUnit(resourceId: Int) {
+    override suspend fun saveWindSpeedUnit(resourceId: Int) {
         val storedValue = SettingOption.fromResourceId(resourceId)
         context.dataStore.edit { pref ->
             pref[WIND_UNIT_KEY] = storedValue
         }
     }
 
-    suspend fun saveLanguage(resourceId: Int) {
+    override suspend fun saveLanguage(resourceId: Int) {
         val storedValue = SettingOption.fromResourceId(resourceId)
         context.dataStore.edit { pref ->
             pref[LANGUAGE_KEY] = storedValue
@@ -68,21 +68,20 @@ class SettingDataStore(private val context: Context) {
         }
 
     }
+
     fun saveLanguageToSharedPrefs(languageCode: String) {
         sharedPreferences.edit().putString(PREF_LANGUAGE_KEY, languageCode).apply()
     }
 
-    fun getLanguageFromSharedPrefs(): String {
+    override fun getLanguageFromSharedPrefs(): String {
         return sharedPreferences.getString(PREF_LANGUAGE_KEY, "en") ?: "en"
     }
 
-    suspend fun saveLocationMethod(resourceId: Int) {
+    override suspend fun saveLocationMethod(resourceId: Int) {
         val storedValue = SettingOption.fromResourceId(resourceId)
         context.dataStore.edit { pref ->
             pref[LOCATION_METHOD_KEY] = storedValue
         }
     }
-
-
 
 }

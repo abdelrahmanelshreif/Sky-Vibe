@@ -6,12 +6,14 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.AlertType
+import com.abdelrahman_elshreif.sky_vibe.data.local.LocationDataStore
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeDatabase
 import com.abdelrahman_elshreif.sky_vibe.data.local.SkyVibeLocalDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.remote.OSMHelper
 import com.abdelrahman_elshreif.sky_vibe.data.remote.RetrofitHelper
 import com.abdelrahman_elshreif.sky_vibe.data.remote.SkyVibeRemoteDataSource
 import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherAlarmPlayer
 import com.abdelrahman_elshreif.sky_vibe.utils.WeatherNotificationManager
@@ -36,7 +38,10 @@ class WeatherAlertWorker(
         SkyVibeLocalDataSource(
             SkyVibeDatabase.getInstance(context).getFavouriteLocationDao(),
             SkyVibeDatabase.getInstance(context).getAlertsDao(),
-            SkyVibeDatabase.getInstance(context).getWeathersDao()
+            SkyVibeDatabase.getInstance(context).getWeathersDao(),
+            LocationDataStore(context),
+            SettingDataStore(context)
+
         )
     )
     private val locationUtilities = LocationUtilities(context)
@@ -66,7 +71,7 @@ class WeatherAlertWorker(
 
             when (alertType) {
                 AlertType.NOTIFICATION.name -> {
-                    notificationManager.showNotification(alertId, address,weatherFeeling)
+                    notificationManager.showNotification(alertId, address, weatherFeeling)
                 }
 
                 AlertType.ALARM.name -> {

@@ -9,32 +9,18 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
 import androidx.core.content.ContextCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.doublePreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.google.android.gms.location.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "location_prefs")
+
 
 class LocationUtilities(private val context: Context) {
-
-    private val fusedClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
-    private val LATITUDE = doublePreferencesKey("latitude")
-    private val LONGITUDE = doublePreferencesKey("longitude")
-    private val ADDRESS = stringPreferencesKey("address")
+    private val fusedClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     @SuppressLint("MissingPermission")
     suspend fun getFreshLocation(): Location? {
@@ -52,6 +38,7 @@ class LocationUtilities(private val context: Context) {
                     fusedClient.removeLocationUpdates(this)
                 }
             }
+
             fusedClient.requestLocationUpdates(
                 locationRequest, locationCallback, Looper.getMainLooper()
             )
@@ -62,36 +49,16 @@ class LocationUtilities(private val context: Context) {
         }
     }
 
-    suspend fun getOrFetchLocation(): Pair<Double, Double>? {
-        return if (checkPermissions() && isLocationEnabled()) {
-            fetchLocationAndAddress().let { (location, _) ->
-                location?.let {
-                    saveLocationToDataStore(it.latitude, it.longitude)
-                    Pair(it.latitude, it.longitude)
-                }
-            }
-        } else {
-            getLocationFromDataStore()
-        }
-    }
-
-    private fun checkLocationAvailability(): Boolean {
-        return checkPermissions() && isLocationEnabled()
-    }
-
-    private fun checkPermissions(): Boolean {
+    fun checkPermissions(): Boolean {
         return (ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
-    private fun isLocationEnabled(): Boolean {
+    fun isLocationEnabled(): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
     suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
@@ -109,49 +76,4 @@ class LocationUtilities(private val context: Context) {
             }
         }
     }
-
-    private suspend fun fetchLocationAndAddress(): Pair<Location?, String> {
-        return try {
-            if (!checkLocationAvailability()) {
-                return Pair(null, "Location not available")
-            }
-
-            val location = getFreshLocation()
-            val address = location?.let {
-                getAddressFromLocation(it.latitude, it.longitude)
-            } ?: "Location not found"
-
-            Pair(location, address)
-        } catch (e: Exception) {
-            Pair(null, "Error: ${e.message}")
-        }
-    }
-
-    suspend fun getLocationFromDataStore(): Pair<Double, Double>? {
-        return context.dataStore.data.map { preferences ->
-            val latitude = preferences[LATITUDE]
-            val longitude = preferences[LONGITUDE]
-            if (latitude != null && longitude != null) {
-                Pair(latitude, longitude)
-            } else {
-                null
-            }
-        }.firstOrNull()
-    }
-
-    suspend fun clearLocationFromSharedPrefs() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(LATITUDE)
-            preferences.remove(LONGITUDE)
-        }
-    }
-
-     suspend fun saveLocationToDataStore(latitude: Double, longitude: Double) {
-        context.dataStore.edit { preferences ->
-            preferences[LATITUDE] = latitude
-            preferences[LONGITUDE] = longitude
-        }
-    }
-
-
 }

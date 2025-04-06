@@ -79,4 +79,6 @@
     <string name="start_time">وقت البدء</string>
     <string name="alert_type_alarm">إنذار</string>
     <string name="alert_type_notification">إشعار</string>
+    <string name="celsius">مئوية</string>
+    <string name="kelvin">كلفن</string>
 </resources>

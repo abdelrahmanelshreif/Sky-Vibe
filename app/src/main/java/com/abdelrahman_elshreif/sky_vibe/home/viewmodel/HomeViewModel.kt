@@ -6,21 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
-import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.data.repo.ISkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.utils.NetworkUtils
+import com.abdelrahman_elshreif.sky_vibe.utils.UnitConverters
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val repository: SkyVibeRepository,
-    private val locationUtilities: LocationUtilities,
-    private val networkUtils: NetworkUtils,
-    private val settingDataStore: SettingDataStore,
+    private val repository: ISkyVibeRepository,
+    private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
     private val _homeWeatherData = MutableStateFlow<WeatherResponse?>(null)
@@ -47,31 +46,21 @@ class HomeViewModel(
     private val _savedLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     val savedLocation = _savedLocation.asStateFlow()
 
-    private val _savedAddress = MutableStateFlow("")
-    val savedAddress = _savedAddress.asStateFlow()
-
     init {
         viewModelScope.launch {
-            _savedLocation.value = locationUtilities.getLocationFromDataStore()
+            _savedLocation.value = repository.getSavedLocation()
             _savedLocation.value?.let { (lat, lon) ->
-                updateAddress(lat, lon)
+                fetchWeatherData(lat, lon)
             }
         }
-        fetchSetting()
-    }
-
-    private fun updateAddress(lat: Double, lon: Double) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _savedAddress.value = locationUtilities.getAddressFromLocation(lat, lon)
-        }
+        fetchSettings()
     }
 
     fun saveSelectedLocationAndFetch(lat: Double, lon: Double) {
         viewModelScope.launch {
-            locationUtilities.saveLocationToDataStore(lat, lon)
+            repository.saveLocation(lat, lon)
             _savedLocation.value = Pair(lat, lon)
             _location.value = Pair(lat, lon)
-            updateAddress(lat, lon)
             fetchWeatherData(lat, lon)
         }
     }
@@ -80,17 +69,14 @@ class HomeViewModel(
         viewModelScope.launch {
             when (_locationMethod.value) {
                 "gps" -> {
-                    locationUtilities.clearLocationFromSharedPrefs()
+                    repository.clearLocation()
                     _savedLocation.value = null
-                    fetchLocationAndWeather()
                 }
-
                 "map" -> {
-                    val saved = locationUtilities.getLocationFromDataStore()
+                    val saved = repository.getSavedLocation()
                     _savedLocation.value = saved
                     saved?.let { (lat, lon) ->
                         _location.value = Pair(lat, lon)
-                        updateAddress(lat, lon)
                         fetchWeatherData(lat, lon)
                     }
                 }
@@ -101,67 +87,71 @@ class HomeViewModel(
     fun fetchWeatherData(lat: Double, lon: Double) {
         viewModelScope.launch {
             _isLoading.value = true
-            val tempUnit =
-                settingDataStore.tempUnit.firstOrNull() ?: SettingOption.CELSIUS.storedValue
-            val windSpeedUnit =
-                settingDataStore.windSpeedUnit.firstOrNull() ?: SettingOption.METER_SEC.storedValue
-            val language = settingDataStore.language.firstOrNull()?.let {
-                if (it == "english") "en" else "ar"
-            } ?: "en"
 
-            if (networkUtils.checkNetworkAvailability()) {
-                repository.getWeatherByCoordinates(lat, lon, lang = language)
-                    .catch { ex ->
-                        _toastEvent.emit(ex.message ?: "Unknown error")
-                        _homeWeatherData.value = null
-                    }
-                    .collect { weatherData ->
-                        weatherData?.let {
-                            val jsonData = Gson().toJson(weatherData)
-                            repository.insertWeatherData(WeatherDataEntity(jsonData = jsonData))
-                            val processedData =
-                                processWeatherData(weatherData, tempUnit, windSpeedUnit)
-                            _homeWeatherData.value = processedData
+            try {
+                val tempUnit = repository.getTempUnit().firstOrNull() ?: SettingOption.CELSIUS.storedValue
+                val windSpeedUnit = repository.getWindUnit().firstOrNull() ?: SettingOption.METER_SEC.storedValue
+                val language = repository.getLanguage().firstOrNull()?.let {
+                    if (it == "english") "en" else "ar"
+                } ?: "en"
+
+                if (networkUtils.checkNetworkAvailability()) {
+                    repository.getWeatherByCoordinates(lat, lon, lang = language)
+                        .catch { ex ->
+                            _toastEvent.emit(ex.message ?: "Unknown error")
+                            _homeWeatherData.value = null
                         }
+                        .collect { weatherData ->
+                            weatherData?.let {
+                                val jsonData = Gson().toJson(weatherData)
+                                repository.insertWeatherData(WeatherDataEntity(jsonData = jsonData))
+                                val processedData = processWeatherData(weatherData, tempUnit, windSpeedUnit)
+                                _homeWeatherData.value = processedData
+                            }
+                        }
+                } else {
+                    _toastEvent.emit("Please connect to network to get latest updates")
+                    val weatherDataEntity = repository.getLastSavedWeather()
+                    weatherDataEntity?.let {
+                        val weatherData = Gson().fromJson(it.jsonData, WeatherResponse::class.java)
+                        val processedData = processWeatherData(weatherData, tempUnit, windSpeedUnit)
+                        _homeWeatherData.value = processedData
+                    } ?: run {
+                        _toastEvent.emit("No offline data available")
                     }
-            } else {
-                _toastEvent.emit("Please connect to network to get latest updates")
-                val weatherDataEntity = repository.getLastSavedWeather()
-                weatherDataEntity?.let {
-                    val weatherData = Gson().fromJson(it.jsonData, WeatherResponse::class.java)
-                    val processedData = processWeatherData(weatherData, tempUnit, windSpeedUnit)
-                    _homeWeatherData.value = processedData
-                } ?: run {
-                    _toastEvent.emit("No offline data available")
                 }
+            } catch (e: Exception) {
+                _toastEvent.emit("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 
     private fun reprocessExistingData() {
         viewModelScope.launch {
-            val tempUnit =
-                settingDataStore.tempUnit.firstOrNull() ?: SettingOption.CELSIUS.storedValue
-            val windSpeedUnit =
-                settingDataStore.windSpeedUnit.firstOrNull() ?: SettingOption.METER_SEC.storedValue
+            try {
+                val tempUnit = repository.getTempUnit().firstOrNull() ?: SettingOption.CELSIUS.storedValue
+                val windSpeedUnit = repository.getWindUnit().firstOrNull() ?: SettingOption.METER_SEC.storedValue
 
-            val weatherDataEntity = repository.getLastSavedWeather()
-            weatherDataEntity?.let {
-                val originalData = Gson().fromJson(it.jsonData, WeatherResponse::class.java)
-                val processedData = processWeatherData(originalData, tempUnit, windSpeedUnit)
-                _homeWeatherData.value = processedData
+                val weatherDataEntity = repository.getLastSavedWeather()
+                weatherDataEntity?.let {
+                    val originalData = Gson().fromJson(it.jsonData, WeatherResponse::class.java)
+                    val processedData = processWeatherData(originalData, tempUnit, windSpeedUnit)
+                    _homeWeatherData.value = processedData
+                }
+            } catch (e: Exception) {
+                _toastEvent.emit("Error processing data: ${e.message}")
             }
         }
     }
 
-    @SuppressLint("LogNotTimber")
-    private fun fetchSetting() {
+    private fun fetchSettings() {
         viewModelScope.launch {
             launch {
-                settingDataStore.tempUnit
+                repository.getTempUnit()
                     .distinctUntilChanged()
-                    .catch { e -> Log.e("HomeViewModel", "Error collecting tempUnit", e) }
+                    .catch { e -> _toastEvent.emit("Error collecting tempUnit: ${e.message}") }
                     .collect { tempUnit ->
                         _tempUnit.value = tempUnit
                         reprocessExistingData()
@@ -169,9 +159,9 @@ class HomeViewModel(
             }
 
             launch {
-                settingDataStore.windSpeedUnit
+                repository.getWindUnit()
                     .distinctUntilChanged()
-                    .catch { e -> Log.e("HomeViewModel", "Error collecting windSpeedUnit", e) }
+                    .catch { e -> _toastEvent.emit("Error collecting windUnit: ${e.message}") }
                     .collect { windUnit ->
                         _windUnit.value = windUnit
                         reprocessExistingData()
@@ -179,9 +169,9 @@ class HomeViewModel(
             }
 
             launch {
-                settingDataStore.locationMethod
+                repository.getLocationMethod()
                     .distinctUntilChanged()
-                    .catch { e -> Log.e("HomeViewModel", "Error collecting locationMethod", e) }
+                    .catch { e -> _toastEvent.emit("Error collecting locationMethod: ${e.message}") }
                     .collect { locMethod ->
                         _locationMethod.value = locMethod
                         onLocationMethodChanged()
@@ -190,69 +180,32 @@ class HomeViewModel(
         }
     }
 
-    @SuppressLint("LogNotTimber")
     private fun processWeatherData(
         weatherData: WeatherResponse,
         tempUnit: String,
         windSpeedUnit: String
     ): WeatherResponse {
-        val processedData = weatherData.copy(
+        return weatherData.copy(
             current = weatherData.current.copy(
-                temp = convertTemperature(weatherData.current.temp, tempUnit),
-                windSpeed = convertWindSpeed(weatherData.current.windSpeed, windSpeedUnit)
+                temp = UnitConverters.convertTemperature(weatherData.current.temp, tempUnit),
+                windSpeed = UnitConverters.convertWindSpeed(weatherData.current.windSpeed, windSpeedUnit)
             ),
             hourly = weatherData.hourly.map { hourlyData ->
                 hourlyData.copy(
-                    temp = convertTemperature(hourlyData.temp, tempUnit),
-                    windSpeed = convertWindSpeed(hourlyData.windSpeed, windSpeedUnit)
+                    temp = UnitConverters.convertTemperature(hourlyData.temp, tempUnit),
+                    windSpeed = UnitConverters.convertWindSpeed(hourlyData.windSpeed, windSpeedUnit)
                 )
             },
             daily = weatherData.daily.map { dailyData ->
                 dailyData.copy(
                     temp = dailyData.temp.copy(
-                        day = convertTemperature(dailyData.temp.day, tempUnit),
-                        min = convertTemperature(dailyData.temp.min, tempUnit),
-                        max = convertTemperature(dailyData.temp.max, tempUnit)
+                        day = UnitConverters.convertTemperature(dailyData.temp.day, tempUnit),
+                        min = UnitConverters.convertTemperature(dailyData.temp.min, tempUnit),
+                        max = UnitConverters.convertTemperature(dailyData.temp.max, tempUnit)
                     ),
-                    windSpeed = convertWindSpeed(dailyData.windSpeed, windSpeedUnit)
+                    windSpeed = UnitConverters.convertWindSpeed(dailyData.windSpeed, windSpeedUnit)
                 )
             }
         )
-        Log.d("HomeViewModel", "Processed Data: $processedData")
-        return processedData
     }
-
-    private fun fetchLocation() {
-        viewModelScope.launch {
-            val loc = locationUtilities.getOrFetchLocation()
-            loc?.let {
-                if (_location.value != it) {
-                    _location.value = it
-                    updateAddress(it.first, it.second)
-                    fetchWeatherData(it.first, it.second)
-                }
-            }
-        }
-    }
-
-    fun fetchLocationAndWeather() {
-        fetchLocation()
-    }
-
-    private fun convertTemperature(temp: Double?, tempUnit: String): Double {
-        return when (tempUnit) {
-            SettingOption.KELVIN.storedValue -> (temp ?: 0.0) + 273.15
-            SettingOption.FAHRENHEIT.storedValue -> (temp ?: 0.0) * 9.0 / 5.0 + 32
-            else -> temp ?: 0.0
-        }
-    }
-
-    private fun convertWindSpeed(speed: Double?, windSpeedUnit: String): Double {
-        return when (windSpeedUnit) {
-            SettingOption.MILE_HOUR.storedValue -> (speed ?: 0.0) * 2.23694
-            else -> speed ?: 0.0
-        }
-    }
-
 }
-

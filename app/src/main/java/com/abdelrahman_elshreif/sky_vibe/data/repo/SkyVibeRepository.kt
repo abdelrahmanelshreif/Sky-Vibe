@@ -2,6 +2,7 @@ package com.abdelrahman_elshreif.sky_vibe.data.repo
 
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.data.local.ISkyVibeLocalDataSource
+import com.abdelrahman_elshreif.sky_vibe.data.model.NominatimLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.SkyVibeLocation
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherDataEntity
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
@@ -10,59 +11,75 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-@Suppress("UNCHECKED_CAST")
 class SkyVibeRepository private constructor(
     private val remoteDataSource: ISkyVibeRemoteDataSource,
     private val localDataSource: ISkyVibeLocalDataSource,
 ) : ISkyVibeRepository {
+
     companion object {
-        var repository: SkyVibeRepository? = null
+        @Volatile
+        private var repository: SkyVibeRepository? = null
+
         fun getInstance(
             remoteDataSource: ISkyVibeRemoteDataSource,
             localDataSource: ISkyVibeLocalDataSource
-        ): SkyVibeRepository? {
-            if (repository == null) {
-                repository = SkyVibeRepository(remoteDataSource, localDataSource)
+        ): SkyVibeRepository {
+            return repository ?: synchronized(this) {
+                repository ?: SkyVibeRepository(remoteDataSource, localDataSource).also {
+                    repository = it
+                }
             }
-            return repository
         }
     }
 
-    override fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> =
-        flow {
+    // Weather Data Operations
+    override fun getWeatherByCoordinates(lat: Double, lon: Double): Flow<WeatherResponse?> = flow {
+        try {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon)
             emit(response)
-        }.catch {
+        } catch (e: Exception) {
             emit(null)
         }
+    }
 
     override fun getWeatherByCoordinates(
         lat: Double,
         lon: Double,
         lang: String
-    ): Flow<WeatherResponse?> =
-        flow {
+    ): Flow<WeatherResponse?> = flow {
+        try {
             val response = remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang)
             emit(response)
-        }.catch {
+        } catch (e: Exception) {
             emit(null)
         }
+    }
 
     override fun getWeatherByCoordinates(
         lat: Double,
         lon: Double,
         lang: String,
         unit: String
-    ): Flow<WeatherResponse?> =
-        flow {
-            val response =
-                remoteDataSource.getWeatherDataOfCoordinates(lat, lon, lang = lang, unit = unit)
+    ): Flow<WeatherResponse?> = flow {
+        try {
+            val response = remoteDataSource.getWeatherDataOfCoordinates(
+                lat, lon, lang = lang, unit = unit
+            )
             emit(response)
-        }.catch {
+        } catch (e: Exception) {
             emit(null)
         }
+    }
 
+    override suspend fun getLastSavedWeather(): WeatherDataEntity? {
+        return localDataSource.getLastSavedWeather()
+    }
 
+    override suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long {
+        return localDataSource.insertWeatherData(weatherData)
+    }
+
+    // Favorite Locations Operations
     override suspend fun getAllSavedLocations(): Flow<List<SkyVibeLocation>> {
         return localDataSource.getFavouriteLocations()
     }
@@ -72,15 +89,19 @@ class SkyVibeRepository private constructor(
     }
 
     override suspend fun deleteLocationFromFavourite(location: SkyVibeLocation) {
-        return localDataSource.deleteLocationFromFavourite(location)
+        localDataSource.deleteLocationFromFavourite(location)
     }
 
-    override fun searchLocations(query: String) =
-        flow {
+    override fun searchLocations(query: String): Flow<List<NominatimLocation>> = flow {
+        try {
             val response = remoteDataSource.getSuggestedLocations(query)
             emit(response)
+        } catch (e: Exception) {
+            emit(emptyList())
         }
+    }
 
+    // Alerts Operations
     override suspend fun getAlerts(): Flow<List<WeatherAlert>> {
         return localDataSource.getAlerts()
     }
@@ -90,24 +111,60 @@ class SkyVibeRepository private constructor(
     }
 
     override suspend fun deleteAlert(weatherAlert: WeatherAlert) {
-        return localDataSource.deleteAlert(weatherAlert)
+        localDataSource.deleteAlert(weatherAlert)
     }
 
     override suspend fun updateAlert(weatherAlert: WeatherAlert) {
-        return localDataSource.updateAlert(weatherAlert)
+        localDataSource.updateAlert(weatherAlert)
     }
 
     override suspend fun disableAlert(alertId: Long) {
-        return localDataSource.disableAlert(alertId)
+        localDataSource.disableAlert(alertId)
     }
 
-    override suspend fun getLastSavedWeather(): WeatherDataEntity? {
-        return localDataSource.getLastSavedWeather()
+    // Location Storage Operations
+    override suspend fun getSavedLocation(): Pair<Double, Double>? {
+        return localDataSource.getSavedLocation()
     }
 
-    override suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long {
-        return localDataSource.insertWeatherData(weatherData)
-
+    override suspend fun saveLocation(lat: Double, lon: Double) {
+        localDataSource.saveLocation(lat, lon)
     }
 
+    override suspend fun clearLocation() {
+        localDataSource.clearLocation()
+    }
+
+    // Settings Operations
+    override suspend fun getTempUnit(): Flow<String> {
+        return localDataSource.getTempUnit()
+    }
+
+    override suspend fun getWindUnit(): Flow<String> {
+        return localDataSource.getWindUnit()
+    }
+
+    override suspend fun getLanguage(): Flow<String> {
+        return localDataSource.getLanguage()
+    }
+
+    override suspend fun getLocationMethod(): Flow<String> {
+        return localDataSource.getLocationMethod()
+    }
+
+    override suspend fun saveTempUnit(unit: String) {
+        localDataSource.saveTempUnit(unit)
+    }
+
+    override suspend fun saveWindUnit(unit: String) {
+        localDataSource.saveWindUnit(unit)
+    }
+
+    override suspend fun saveLanguage(language: String) {
+        localDataSource.saveLanguage(language)
+    }
+
+    override suspend fun saveLocationMethod(method: String) {
+        localDataSource.saveLocationMethod(method)
+    }
 }

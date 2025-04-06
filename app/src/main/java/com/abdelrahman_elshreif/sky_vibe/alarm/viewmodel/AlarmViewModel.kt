@@ -10,7 +10,7 @@ import androidx.work.workDataOf
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlert
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertEvent
 import com.abdelrahman_elshreif.sky_vibe.alarm.model.WeatherAlertState
-import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.data.repo.ISkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
 import com.abdelrahman_elshreif.sky_vibe.workers.WeatherAlertWorker
 import kotlinx.coroutines.Dispatchers
@@ -23,11 +23,9 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class AlarmViewModel(
-    private val repository: SkyVibeRepository,
-    private val workManager: WorkManager,
-    private val locationUtilities: LocationUtilities
+    private val repository: ISkyVibeRepository,
+    private val workManager: WorkManager
 ) : ViewModel() {
-
 
     private val _alertState = MutableStateFlow(WeatherAlertState())
     val alertState = _alertState.asStateFlow()
@@ -38,29 +36,39 @@ class AlarmViewModel(
     private val _notificationsEnabled = MutableStateFlow(false)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
-    private val _locationOnDemand = MutableStateFlow<Pair<Double, Double>?>(null)
-    val locationOnDemand = _locationOnDemand.asStateFlow()
+    private val _savedLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    val savedLocation = _savedLocation.asStateFlow()
 
     init {
         loadAlerts()
     }
 
+    fun getLocationForAlert() {
+        viewModelScope.launch {
+            try {
+                _savedLocation.value = repository.getSavedLocation()
+                if (_savedLocation.value != null) {
+                    _showAddDialog.value = true
+                }
+            } catch (e: Exception) {
+                _alertState.update {
+                    it.copy(error = "Failed to get location: ${e.message}")
+                }
+            }
+        }
+    }
     fun initializeNotifications() {
         _notificationsEnabled.value = true
-
     }
-
 
     fun disableNotifications() {
         _notificationsEnabled.value = false
     }
 
-
     fun onEvent(event: WeatherAlertEvent) {
         when (event) {
             is WeatherAlertEvent.OnAddAlertClick -> {
-                getLocationForAlert()
-
+                _showAddDialog.value = true
             }
 
             is WeatherAlertEvent.OnAlertDeleted -> {
@@ -78,30 +86,16 @@ class AlarmViewModel(
             is WeatherAlertEvent.OnSaveAlert -> {
                 saveAlert(event.alert)
             }
-
-        }
-    }
-
-    private fun getLocationForAlert() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _locationOnDemand.value = locationUtilities.getOrFetchLocation()
-            _showAddDialog.value = true
         }
     }
 
     private fun saveAlert(alert: WeatherAlert) {
         viewModelScope.launch(Dispatchers.IO) {
-
             try {
-                val loc = locationUtilities.getLocationFromDataStore()
-                alert.alertArea = locationUtilities.getAddressFromLocation(loc!!.first, loc.second)
-
                 val alertId = repository.addNewAlert(alert)
                 val alertWithId = alert.copy(id = alertId)
                 scheduleAlert(alertWithId)
-
                 _showAddDialog.value = false
-
             } catch (e: Exception) {
                 _alertState.update {
                     it.copy(
@@ -110,7 +104,6 @@ class AlarmViewModel(
                 }
             }
         }
-
     }
 
     private fun scheduleAlert(alert: WeatherAlert) {
@@ -151,19 +144,15 @@ class AlarmViewModel(
 
     private fun toggleAlert(alert: WeatherAlert) {
         viewModelScope.launch(Dispatchers.IO) {
-
             val updatedAlert = alert.copy(
                 isEnabled = !alert.isEnabled
             )
-
             repository.updateAlert(updatedAlert)
-
             if (updatedAlert.isEnabled) {
                 scheduleAlert(updatedAlert)
             } else {
                 workManager.cancelUniqueWork("alert_${alert.id}")
             }
-
         }
     }
 
@@ -207,5 +196,4 @@ class AlarmViewModel(
             }
         }
     }
-
 }

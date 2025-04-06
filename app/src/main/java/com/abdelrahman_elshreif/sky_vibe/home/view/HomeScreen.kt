@@ -3,6 +3,7 @@ package com.abdelrahman_elshreif.sky_vibe.home.view
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,30 +42,45 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.abdelrahman_elshreif.sky_vibe.R
+import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
 import com.abdelrahman_elshreif.sky_vibe.favourite.viewModel.FavouriteViewModel
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.ErrorState
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.HomeContent
 import com.abdelrahman_elshreif.sky_vibe.home.view.components.LoadingWeatherState
 import com.abdelrahman_elshreif.sky_vibe.home.viewmodel.HomeViewModel
 import com.abdelrahman_elshreif.sky_vibe.map.view.MapScreen
-
-fun Context.hasPermission(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-}
+import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewModel ) {
-
+fun HomeScreen(
+    homeViewModel: HomeViewModel,
+    favouriteViewModel: FavouriteViewModel,
+    locationUtilities: LocationUtilities
+) {
     val weatherData by homeViewModel.homeWeatherData.collectAsStateWithLifecycle(null)
     val isLoading by homeViewModel.isLoading.collectAsStateWithLifecycle(true)
     val tempUnit by homeViewModel.tempUnit.collectAsStateWithLifecycle()
     val windUnit by homeViewModel.windUnit.collectAsStateWithLifecycle()
     val locationMethod by homeViewModel.locationMethod.collectAsStateWithLifecycle()
     val savedLocation by homeViewModel.savedLocation.collectAsStateWithLifecycle(null)
-    val savedAddress by homeViewModel.savedAddress.collectAsStateWithLifecycle("")
     var showLocationSelection by remember { mutableStateOf(false) }
+    var currentAddress by remember { mutableStateOf("") }
+
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+
+
+    LaunchedEffect(savedLocation) {
+        savedLocation?.let { (lat, lon) ->
+            currentAddress = locationUtilities.getAddressFromLocation(lat, lon)
+        }
+    }
 
     LaunchedEffect(Unit) {
         homeViewModel.toastEvent.collect { message ->
@@ -71,13 +88,18 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
         }
     }
 
-    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            homeViewModel.fetchLocationAndWeather()
+            scope.launch {
+                locationUtilities.getFreshLocation()?.let { location ->
+                    homeViewModel.saveSelectedLocationAndFetch(
+                        location.latitude,
+                        location.longitude
+                    )
+                }
+            }
         } else {
             if (savedLocation == null) {
                 showLocationSelection = true
@@ -87,7 +109,6 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-
                 savedLocation?.let { (lat, lon) ->
                     homeViewModel.fetchWeatherData(lat, lon)
                 }
@@ -101,10 +122,16 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                 if (!context.hasPermission(locationPermission)) {
                     permissionLauncher.launch(locationPermission)
                 } else {
-                    homeViewModel.fetchLocationAndWeather()
+                    scope.launch {
+                        locationUtilities.getFreshLocation()?.let { location ->
+                            homeViewModel.saveSelectedLocationAndFetch(
+                                location.latitude,
+                                location.longitude
+                            )
+                        }
+                    }
                 }
             }
-
             "map" -> {
                 if (savedLocation == null) {
                     showLocationSelection = true
@@ -153,9 +180,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
                         weatherData = weatherData!!,
                         tempUnit = tempUnit,
                         windUnit = windUnit,
-                        address = savedAddress
+                        address = currentAddress
                     )
-
                     else -> ErrorState()
                 }
             }
@@ -176,10 +202,9 @@ fun HomeScreen(homeViewModel: HomeViewModel, favouriteViewModel: FavouriteViewMo
         }
     }
 }
-
-
-
-
+private fun Context.hasPermission(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+}
 
 
 

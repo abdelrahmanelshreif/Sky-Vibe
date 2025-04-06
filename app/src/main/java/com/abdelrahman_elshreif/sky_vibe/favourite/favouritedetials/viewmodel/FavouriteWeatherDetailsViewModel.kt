@@ -1,10 +1,9 @@
 package com.abdelrahman_elshreif.sky_vibe.favourite.favouritedetials.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abdelrahman_elshreif.sky_vibe.data.model.WeatherResponse
-import com.abdelrahman_elshreif.sky_vibe.data.repo.SkyVibeRepository
+import com.abdelrahman_elshreif.sky_vibe.data.repo.ISkyVibeRepository
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingDataStore
 import com.abdelrahman_elshreif.sky_vibe.settings.model.SettingOption
 import com.abdelrahman_elshreif.sky_vibe.utils.LocationUtilities
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class FavouriteWeatherDetailsViewModel(
-    private val repository: SkyVibeRepository,
+    private val repository: ISkyVibeRepository,
     private val settingDataStore: SettingDataStore,
     private val locationUtilities: LocationUtilities
 ) : ViewModel() {
