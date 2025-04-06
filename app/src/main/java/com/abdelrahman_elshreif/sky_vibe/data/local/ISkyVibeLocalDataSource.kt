@@ -23,4 +23,7 @@ interface ISkyVibeLocalDataSource {
     suspend fun disableAlert(alertId: Long)
     suspend fun getLastSavedWeather(): WeatherDataEntity?
     suspend fun insertWeatherData(weatherData: WeatherDataEntity): Long
+
+    suspend fun getAddressFromLocation(lat: Double, lon: Double): String
+    suspend fun getSavedLocation(): Pair<Double, Double>?
 }

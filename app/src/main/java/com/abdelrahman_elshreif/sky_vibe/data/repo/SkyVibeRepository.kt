@@ -110,4 +110,13 @@ class SkyVibeRepository private constructor(
 
     }
 
+    suspend fun getSavedLocation(): Pair<Double, Double>? {
+        return localDataSource.getSavedLocation()
+    }
+
+
+    suspend fun getAddressFromLocation(lat: Double, lon: Double): String {
+        return localDataSource.getAddressFromLocation(lat, lon)
+    }
+
 }

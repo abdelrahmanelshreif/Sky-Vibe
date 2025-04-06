@@ -23,7 +23,6 @@ class AlarmViewModelTest {
         repository = mockk(relaxed = true)
         workManager = mockk(relaxed = true)
         locationUtilities = mockk(relaxed = true)
-
         viewModel = AlarmViewModel(repository, workManager, locationUtilities)
     }
 
