@@ -64,7 +64,7 @@ Sky-Vibe is an Android weather application that provides real-time weather updat
 
 ## 💻 Tech Stack
 
-- Language: **Kotlin **
+- Language: **Kotlin**
 - Architecture: **MVVM**
 - UI: **Jetpack Compose / XML**
 - Location: **Open Street Maps, GPS**
